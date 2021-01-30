@@ -1,5 +1,5 @@
 # drone-jetson
-This ROS code runs on the ISAACS on-board Linux computer. Our on-board computer is currently the Nvidia Jetson NX and we're using the ZED 2 camera. This repo contains the **ROS Melodic** packages for ZED 2 Camera and Voxblox, for example. This code is to be cloned in the `src` directory of your catkin workspace, and compiled.
+This ROS code runs on the ISAACS on-board Linux computer. Our on-board computer is currently the Nvidia Jetson NX and we're using the ZED 2 camera. This repo contains the **ROS Melodic** packages for ZED 2 Camera and Voxblox, for example, as well as their dependencies. This code is to be cloned in the `src` directory of your catkin workspace, and compiled.
 
 Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions may work for any linux computer, only computers with Nvidia GPUs will be able to connect to a ZED 2 camera. All other computers will be able to work only with ROS Bags (recordings) of the ZED 2.
 
@@ -10,6 +10,18 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 - Ubuntu 18.04
 - ROS Melodic
 - [ZED SDK (tested with 3.4.0, CUDA 10.2)](https://www.stereolabs.com/developers/release/)
+- DJI Onboard SDK ("DJI OSDK") See below for instructions
+
+### Installing DJI Onboard-SDK
+- Before installing the DJI SDK ROS package, we need to install the DJI SDK. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We will do the same thing with ZED SDK--first we install the ZED SDK and only then we install the ZED ROS Wrapper (aka package).
+- `cd ~`
+- You may navigatge to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `~/code/`
+- `git clone https://github.com/dji-sdk/Onboard-SDK`
+- `mkdir build`
+- `cd build`
+- `cmake ..`
+- `make djiosdk-core`
+- `sudo make install`
 
 ### Setting up ROS workspace, downloading, and building
 
@@ -31,7 +43,23 @@ Create a catkin workspace as follows. If you've made one before on your personal
 - `source devel/setup.bash` this tells ROS to use this workspace. Run this command on every new terminal you open for running ROS stuff. Alternatively, add `cd $HOME/row_catkin_ws && source devel/setup.bash` to your `.bashrc` file so it will run this command for you every time you open a new terminal.
 
 
+
 ### Installing other ROS Packages
 - ROS Bridge, for sending data to other computers on the network, namely VR interface (or ISAACS server in the future). `sudo apt-get install ros-melodic-rosbridge-server`
+
+## Help
+
+### Troubleshooting
+- Just try this again `source ~/ros_catkin_ws/devel.bash`
+- **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
+- **Compilation Failing after git pull? Did someone add a new package?** Maybe the new package you pulled was a git submodule. So run this again from the instructions above: `git submodule update --init --recursive`
+- **Installing a new ROS package in this repo?** Have its dependencies automatically downloaded using `rosdep install --from-paths src --ignore-src -r -y` found [here](http://wiki.ros.org/rosdep#Install_dependency_of_all_packages_in_the_workspace)
+
+### Tips & tricks
+- **Want to see info about *catkin build* beforehand?** Use `catkin build --dry-run`
+- **If you want to install new ros packages:** that don't have installation instructions, they would either be a git repo you need to clone, or the BETTER way is through an apt-get installation, like we installed **ros bridge** above. Sometimes you gotta guess the name so usually it follows this format `sudo apt-get install ros-<ROS_version>-<package_name>`. Google around!
+
+
+
 
 
