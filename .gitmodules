@@ -1,0 +1,52 @@
+[submodule "voxblox"]
+	path = src/voxblox
+	url = https://github.com/ethz-asl/voxblox.git
+
+[submodule "catkin_boost_python_buildtool"]
+	path = src/catkin_boost_python_buildtool
+	url = https://github.com/ethz-asl/catkin_boost_python_buildtool.git
+
+[submodule "catkin_simple"]
+	path = src/catkin_simple
+	url = https://github.com/catkin/catkin_simple.git
+
+[submodule "eigen_catkin"]
+	path = src/eigen_catkin
+	url = https://github.com/ethz-asl/eigen_catkin.git
+
+[submodule "eigen_checks"]
+	path = src/eigen_checks
+	url = https://github.com/ethz-asl/eigen_checks.git
+
+[submodule "gflags_catkin"]
+	path = src/gflags_catkin
+	url = https://github.com/ethz-asl/gflags_catkin.git
+
+[submodule "glog_catkin"]
+	path = src/glog_catkin
+	url = https://github.com/ethz-asl/glog_catkin.git
+
+[submodule "minkindr"]
+	path = src/minkindr
+	url = https://github.com/ethz-asl/minkindr.git
+
+[submodule "minkindr_ros"]
+	path = src/minkindr_ros
+	url = https://github.com/ethz-asl/minkindr_ros.git
+
+[submodule "numpy_eigen"]
+	path = src/numpy_eigen
+	url = https://github.com/ethz-asl/numpy_eigen.git
+
+[submodule "protobuf_catkin"]
+	path = src/protobuf_catkin
+	url = https://github.com/ethz-asl/protobuf_catkin.git
+
+[submodule "zed-ros-examples"]
+	path = src/zed-ros-examples
+	url = https://github.com/stereolabs/zed-ros-examples.git
+
+[submodule "zed-ros-wrapper"]
+	path = src/zed-ros-wrapper
+	url = https://github.com/stereolabs/zed-ros-wrapper.git
+
