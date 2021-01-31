@@ -15,7 +15,7 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 ##### Installing DJI Onboard-SDK (Prerequisite)
 - Just like we installed the ZED SDK already (which has nothing to do with ROS), we do the same thing and install DJI's SDK, which has no relation to ROS. The ROS packages/wrappers come later on top of the SDKs. So now, before installing the DJI SDK ROS wrapper, we need to first install the *DJI SDK*. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We have done the same thing with ZED SDK--first we installed the ZED SDK and soon we will install the ZED ROS Wrapper (aka package).
 - `cd ~`
-- You may navigatge to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `cd ~/code/`
+- You may navigate to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `cd ~/code/`
 - `git clone https://github.com/dji-sdk/Onboard-SDK`
 - `mkdir build`
 - `cd build`
@@ -37,7 +37,7 @@ Create a catkin workspace as follows. If you've made one before on your personal
 - `git clone https://github.com/immersive-command-system/drone-jetson.git`
 - `git submodule update --init --recursive` Clones all the submodules, which are git repos within this git repo. Each submodule is a ROS package.
 - Good job!
-- The next step is to compile, but do note it takes up quite a bit of RAM. Please watch the RAM usage as you compile so your computer doesn't freeze on you. To limit the RAM usage during compilation, you have two options. The smooth-brain way is to kill `ctrl+c` the compilation process whenever the RAM usage is increasing past 90-95% of your total RAM, and re-run the compilation process. It will pick up where it left off, quickly checking off the stuff it has aleady compiled, and resuming! In addition, you can also limit your usage by closing all other programs, or if using a VM, increase its RAM allowance. I followed the smooth brain way to stay below my 8gb of RAM. And then the wrinkly-brain way of limiting RAM usage is learning to use these [commands/flags](https://github.com/catkin/catkin_tools/issues/167).
+- The next step is to compile, but do note it takes up quite a bit of RAM. Please watch the RAM usage as you compile so your computer doesn't freeze on you. To limit the RAM usage during compilation, you have two options. The smooth-brain way is to kill `ctrl+c` the compilation process whenever the RAM usage is increasing past 90-95% of your total RAM. Then, **re-run** the compilation process (using the same command). It will pick up where it left off, quickly checking off the stuff it has aleady compiled, and resuming! In addition, you can also limit your RAM usage by closing all other programs, or if using a VM, increase its RAM allowance. I followed the smooth-brain way to stay below my 8gb of RAM. So that's one way to do this. The other way, the wrinkly-brain way, of limiting RAM usage is learning to use these [commands/flags](https://github.com/catkin/catkin_tools/issues/167).
 - `cd ..` you should be back in the directory *ros_catkin_ws*
 - `catkin build` Compiles all the packages
 - `source devel/setup.bash` this tells ROS to use this workspace. Run this command on every new terminal you open for running ROS stuff. Alternatively, add `cd $HOME/row_catkin_ws && source devel/setup.bash` to your `.bashrc` file so it will run this command for you every time you open a new terminal.
