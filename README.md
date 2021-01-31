@@ -17,6 +17,7 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 - `cd ~`
 - You may navigate to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `cd ~/code/`
 - `git clone https://github.com/dji-sdk/Onboard-SDK`
+- `cd Onboard-SDK`
 - `mkdir build`
 - `cd build`
 - `cmake ..`
@@ -50,7 +51,7 @@ Create a catkin workspace as follows. If you've made one before on your personal
 ## Help
 
 ### Troubleshooting
-- Just try this again `source ~/ros_catkin_ws/devel.bash`
+- Just try this again `source ~/ros_catkin_ws/devel/setup.bash`
 - Restart your computer
 - **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
 - **Compilation Failing after git pull? Did someone add a new package?** Maybe the new package you pulled was a git submodule. So run this again from the instructions above: `git submodule update --init --recursive`
