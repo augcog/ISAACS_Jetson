@@ -73,7 +73,7 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 - Now in the left menu/region (called "Displays") click on **"Fixed Frame"** and select (or type in) **"world"**
 5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
 
-## ROS-Bridge + Unity Test
+### ROS-Bridge + Unity Test
 This test will make sure you're able to connect Unity to the on-board computer over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
 To be continued...
 
