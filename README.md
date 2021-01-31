@@ -13,9 +13,9 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 - DJI Onboard SDK ("DJI OSDK") See below for instructions
 
 ##### Installing DJI Onboard-SDK (Prerequisite)
-- Just like we installed the ZED SDK already (which has nothing to do with ROS), we do the same thing with DJI's SDK. The ROS packages/wrappers come later. So here, before installing the DJI SDK ROS package, we need to first install the *DJI Onboard SDK*. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We have done the same thing with ZED SDK--first we install the ZED SDK and later we will install the ZED ROS Wrapper (aka package).
+- Just like we installed the ZED SDK already (which has nothing to do with ROS), we do the same thing and install DJI's SDK, which has no relation to ROS. The ROS packages/wrappers come later on top of the SDKs. So now, before installing the DJI SDK ROS wrapper, we need to first install the *DJI SDK*. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We have done the same thing with ZED SDK--first we installed the ZED SDK and soon we will install the ZED ROS Wrapper (aka package).
 - `cd ~`
-- You may navigatge to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `~/code/`
+- You may navigatge to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `cd ~/code/`
 - `git clone https://github.com/dji-sdk/Onboard-SDK`
 - `mkdir build`
 - `cd build`
