@@ -9,10 +9,10 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 
 - Ubuntu 18.04
 - ROS Melodic
-- [ZED SDK (tested with 3.4.0, CUDA 10.2)](https://www.stereolabs.com/developers/release/) Please update if your version <3.4.0
+- [ZED SDK (tested with 3.4.0, CUDA 10.2)](https://www.stereolabs.com/developers/release/) Please update if your version is earlier than 3.4.0
 - DJI Onboard SDK ("DJI OSDK") See below for instructions
 
-### Installing DJI Onboard-SDK
+### Installing DJI Onboard-SDK (Prerequisite)
 - Before installing the DJI SDK ROS package, we need to install the DJI SDK. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We will do the same thing with ZED SDK--first we install the ZED SDK and only then we install the ZED ROS Wrapper (aka package).
 - `cd ~`
 - You may navigatge to and install this in any directory. I like to install stuff in my code directory I made in $HOME . So I'll do `~/code/`
@@ -51,9 +51,11 @@ Create a catkin workspace as follows. If you've made one before on your personal
 
 ### Troubleshooting
 - Just try this again `source ~/ros_catkin_ws/devel.bash`
+- Restart your computer
 - **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
 - **Compilation Failing after git pull? Did someone add a new package?** Maybe the new package you pulled was a git submodule. So run this again from the instructions above: `git submodule update --init --recursive`
 - **Installing a new ROS package in this repo?** Have its dependencies automatically downloaded using `rosdep install --from-paths src --ignore-src -r -y` found [here](http://wiki.ros.org/rosdep#Install_dependency_of_all_packages_in_the_workspace)
+- If all else fails, restart your computer
 
 ### Tips & tricks
 - **Want to see info about *catkin build* beforehand?** Use `catkin build --dry-run`
