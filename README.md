@@ -48,6 +48,35 @@ Create a catkin workspace as follows. If you've made one before on your personal
 ### Installing other ROS Packages
 - ROS Bridge, for sending data to other computers on the network, namely VR interface (or ISAACS server in the future). `sudo apt-get install ros-melodic-rosbridge-server`
 
+## Tests
+
+### Voxblox (and ROS) Test
+First, let's make sure ROS is working AND test voxblox:
+- open a terminal, (let's call it T1), source the workspace as shown above, and run: `roscore`
+- It will print out info about what's running and then quiet down. Now ROS core is fully up and running. Remember, ROS Core is the thing that helps all the nodes pass messages between each other. Great, ROS works!
+- **Leave T1 with roscore running!!**
+
+Now, to make sure Voxblox is working, we will follow the Voxblox running instructions they have [here](https://voxblox.readthedocs.io/en/latest/pages/Running-Voxblox.html). You will see how to visualize Voxblox Meshes in the commonly-used visualizer program called "rviz"! The code you run here will (under the hood) take in a point-cloud dataset (ROS bag), use voxblox to convert it to meshes, and publish the meshes on the voxblox_mesh topic. Finally, you'll use rviz to visualize those meshes!
+<br> **Don't forget to source your workspace for every terminal you open!**
+1. They say to download one of the datasets -- and they are big! (note some contain textured data, some do not -- textured data is just cooler!)
+- Notice the downloaded file is a `.bag` file -- a ROS bag. It's simply a recording of data. ROS Bags are used for storing data, and replaying data at a later time, as if it was live-captured.
+2. They say to "edit the path to the bagfile in cow_and_lady_dataset.launch"
+- Do so by opening another terminal (let's call it T2) and running `roscd voxblox_ros/launch` 
+- Edit the launch file so the path points to your dataset. Make sure you're editing the right launch file for the dataset you downloaded
+3. Run the dataset launch file. 
+- If using the the "cow & lady dataset", run: `roslaunch voxblox_ros cow_and_lady_dataset.launch`
+- The ROS tutorials should have covered what this type of command does hopefully, but basically 1) `roslaunch` runs a launch file AND starts ROS core (if it hasn't already been started), 2) specifies which package the launch file is in, and 3) specifies which launch file to launch.
+- Now, stuff should play in T2 for a while. If it stops before we get to the end of this test, simply re-launch the launch file. It's playing back data so you can re-replay it as much as you'd like. 
+4. They say to 1) **open rviz** and 2) see the the mesh visualized on the **/voxblox_node/mesh topic** in the **world static frame**
+- Do so by opening a 3rd terminal (T3), source the workspace of course, and run: `rviz` -- a beloved visualizer program!
+- Now, we'll add the ROS Topic we want to visualize. Near the bottom-left, click **"Add"**, then **"By Topic"**, then scroll down and select **"Voxblox Mesh"**. Click **"OK"**. If "voxblox" is not there, re-launch roslaunch command in T2 again, and try again -- click "Add" again. If it's still not there, kill rviz and source the workspace in T3.
+- Now in the left menu/region (called "Displays") click on **"Fixed Frame"** and select (or type in) **"world"**
+5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
+
+## ROS-Bridge + Unity Test
+This test will make sure you're able to connect Unity to the on-board computer over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
+To be continued...
+
 ## Help
 
 ### Troubleshooting
