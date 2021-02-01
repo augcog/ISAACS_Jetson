@@ -62,7 +62,7 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 - Notice the downloaded file is a `.bag` file -- a ROS bag. It's simply a recording of data. ROS Bags are used for storing data, and replaying data at a later time, as if it was live-captured.
 2. They say to "edit the path to the bagfile in cow_and_lady_dataset.launch"
 - Do so by opening another terminal (let's call it T2) and running `roscd voxblox_ros/launch` 
-- Edit the launch file so the path points to your dataset. Make sure you're editing the right launch file for the dataset you downloaded
+- Edit the launch file so the path points to your dataset. **The path should be an absolute path to the bag rather rather than a relative path or a path using the $HOME symbol `~`** Make sure you're editing the right launch file for the dataset you downloaded
 3. Run the dataset launch file. 
 - If using the the "cow & lady dataset", run: `roslaunch voxblox_ros cow_and_lady_dataset.launch`
 - The ROS tutorials should have covered what this type of command does hopefully, but basically 1) `roslaunch` runs a launch file AND starts ROS core (if it hasn't already been started), 2) specifies which package the launch file is in, and 3) specifies which launch file to launch.
