@@ -8,9 +8,13 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 ### Prerequisites
 
 - Ubuntu 18.04
+- [ZED SDK](https://www.stereolabs.com/developers/release/) (tested with 3.4.0, CUDA 10.2). Please upgrade if your version is earlier than 3.4.0
 - ROS Melodic (see below for details)
-- [ZED SDK (tested with 3.4.0, CUDA 10.2)](https://www.stereolabs.com/developers/release/) Please update if your version is earlier than 3.4.0
 - DJI Onboard SDK ("DJI OSDK") See below for instructions
+
+##### Installing ZED SDK (Prerequisite)
+Use the link above for downloading ZED SDK
+- If you're on Jetson, download the release for Jetson
 
 ##### Installing ROS Melodic on Ubuntu 18.04 (Prerequisite)
 Follow these [installation instructions](http://wiki.ros.org/melodic/Installation/Ubuntu) but keep in mind these notes:
