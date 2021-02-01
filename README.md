@@ -17,6 +17,9 @@ Follow these [installation instructions](http://wiki.ros.org/melodic/Installatio
 - Install the "ros-melodic-desktop-full" version of ROS
 - After running the command that installs that version of ROS, also run `sudo apt-get install python-catkin-tools python-catkin-pkg`
 - We're using python 2.x Do not do follow instructions for python3
+- Any instruction that refers to “kinetic” or “noetic”, replace it with “melodic”. The names kinetic and noetic are other versions of ROS
+- Any place that makes a distinction between *catkin* and *rosbuild*, use "catkin" as its the newer version
+
 
 ##### Installing DJI Onboard-SDK (Prerequisite)
 - Just like we installed the ZED SDK already (which has nothing to do with ROS), we do the same thing and install DJI's SDK, which has no relation to ROS. The ROS packages/wrappers come later on top of the SDKs. So now, before installing the DJI SDK ROS wrapper, we need to first install the *DJI SDK*. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We have done the same thing with ZED SDK--first we installed the ZED SDK and soon we will install the ZED ROS Wrapper (aka package).
