@@ -1,5 +1,5 @@
 # drone-jetson
-This ROS code runs on the ISAACS on-board Linux computer. Our on-board computer is currently the Nvidia Jetson NX and we're using the ZED 2 camera. This repo contains the **ROS Melodic** packages for ZED 2 Camera and Voxblox, for example, as well as their dependencies. This code is to be cloned in the `src` directory of your catkin workspace, and compiled.
+This ROS code runs on the ISAACS on-board Linux computer and interfaces with the ZED camera as well as the DJI drone. Our on-board computer is currently the Nvidia Jetson NX (instead of the Manifold 2) and we're using the ZED 2 camera. This repo contains the **ROS Melodic** packages for DJI SDK, ZED 2 Camera, and Voxblox, to name a few, as well as their dependencies. This code is to be cloned in the `src` directory of your catkin workspace, and compiled.
 
 Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions may work for any linux computer, only computers with Nvidia GPUs will be able to connect to a ZED 2 camera. All other computers will be able to work only with ROS Bags (recordings) of the ZED 2.
 
@@ -8,9 +8,13 @@ Note that the ZED 2 camera requires an Nvidia GPU, so while these instructions m
 ### Prerequisites
 
 - Ubuntu 18.04
-- ROS Melodic
+- ROS Melodic (see below for details)
 - [ZED SDK (tested with 3.4.0, CUDA 10.2)](https://www.stereolabs.com/developers/release/) Please update if your version is earlier than 3.4.0
 - DJI Onboard SDK ("DJI OSDK") See below for instructions
+
+##### Installing ROS Melodic on Ubuntu 18.04 (Prerequisite)
+Follow these [installation instructions](http://wiki.ros.org/melodic/Installation/Ubuntu) but keep in mind these notes:
+- Do not do follow instructions for python3. We're using python 2.x
 
 ##### Installing DJI Onboard-SDK (Prerequisite)
 - Just like we installed the ZED SDK already (which has nothing to do with ROS), we do the same thing and install DJI's SDK, which has no relation to ROS. The ROS packages/wrappers come later on top of the SDKs. So now, before installing the DJI SDK ROS wrapper, we need to first install the *DJI SDK*. It's like first building the engine before we put it in the complete, ready-to-use car (The car being the wrapper for the engine). We have done the same thing with ZED SDK--first we installed the ZED SDK and soon we will install the ZED ROS Wrapper (aka package).
