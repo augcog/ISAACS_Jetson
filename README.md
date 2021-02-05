@@ -99,6 +99,7 @@ To be continued...
 - **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
 - **Compilation Failing after git pull? Did someone add a new package?** Maybe the new package you pulled was a git submodule. So run this again from the instructions above: `git submodule update --init --recursive`
 - **Installing a new ROS package in this repo?** Have its dependencies automatically downloaded using `rosdep install --from-paths src --ignore-src -r -y` found [here](http://wiki.ros.org/rosdep#Install_dependency_of_all_packages_in_the_workspace)
+- Possibly need [system depedency](https://index.ros.org/search/?term=sdl2&section=deps) like SDL2 for compilation: `sudo apt-get install libsdl2-dev`
 - If all else fails, restart your computer
 
 ### Tips & tricks
