@@ -93,8 +93,8 @@ To be expanded...but in short:
  1. Get IP address of ROS computer
  2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
  3. Configure sensors in the same inspector window to visualize data of type Mesh
- 4. Turn on ROSBridge
- 5. Stream ROSBag
+ 4. Turn on ROSBridge on ROS computer: `roslaunch rosbridge_server rosbridge_websocket`
+ 5. Play ROSBag on ROS computer
  6. View meshes in Unity
 
 ## Help
