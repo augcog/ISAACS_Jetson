@@ -52,7 +52,7 @@ Create a catkin workspace as follows. If you've made one before on your personal
 - `cd drone-jetson`
 - `git submodule update --init --recursive` Clones all the submodules, which are git repos within this git repo. Each submodule is a ROS package.
 - Good job!
-- The next step is to compile, but do note it takes up quite a bit of RAM. Please watch the RAM usage as you compile so your computer doesn't freeze on you. To limit the RAM usage during compilation, you have two options. The smooth-brain way is to kill `ctrl+c` the compilation process whenever the RAM usage is increasing past 90-95% of your total RAM. Then, **re-run** the compilation process (using the same command). It will pick up where it left off, quickly checking off the stuff it has aleady compiled, and resuming! In addition, you can also limit your RAM usage by closing all other programs, or if using a VM, increase its RAM allowance -- 3-4GB of RAM has worked for some people. I followed the smooth-brain way to stay below my 8gb of RAM. So that's one way to do this. The other way, the wrinkly-brain way, of limiting RAM usage is learning to use these [commands/flags](https://github.com/catkin/catkin_tools/issues/167).
+- The next step is to compile, but do note it takes up quite a bit of RAM. Use: `catkin build --mem-limit 60%` or any other limit that fits you. Otherwise, please watch the RAM usage as you compile so your computer doesn't freeze on you. To limit the RAM usage during compilation, you have two options. The smooth-brain way is to kill `ctrl+c` the compilation process whenever the RAM usage is increasing past 90-95% of your total RAM. Then, **re-run** the compilation process (using the same command). It will pick up where it left off, quickly checking off the stuff it has aleady compiled, and resuming! In addition, you can also limit your RAM usage by closing all other programs, or if using a VM, increase its RAM allowance -- 3-4GB of RAM has worked for some people. I followed the smooth-brain way to stay below my 8gb of RAM. So that's one way to do this. The other way, the wrinkly-brain way, of limiting RAM usage is learning to use these [commands/flags](https://github.com/catkin/catkin_tools/issues/167). I think `catkin build --mem-limit 60%` would do the trick.
 - `cd ..` Before compiling, you should be back in the directory *ros_catkin_ws*
 - `catkin build` Compiles all the packages
 - `source devel/setup.bash` this tells ROS to use this workspace. Run this command on every new terminal you open for running ROS stuff. Alternatively, add `cd $HOME/ros_catkin_ws && source devel/setup.bash` to your `.bashrc` file so it will run this command for you every time you open a new terminal.
@@ -89,7 +89,13 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 
 ### ROS-Bridge + Unity Test
 This test will make sure you're able to connect Unity to the on-board computer over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
-To be continued...
+To be expanded...but in short:
+ 1. Get IP address of ROS computer
+ 2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
+ 3. Configure sensors in the same inspector window to visualize data of type Mesh
+ 4. Turn on ROSBridge
+ 5. Stream ROSBag
+ 6. View meshes in Unity
 
 ## Help
 
