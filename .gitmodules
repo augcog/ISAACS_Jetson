@@ -2,6 +2,10 @@
 	path = src/voxblox
 	url = https://github.com/ethz-asl/voxblox.git
 
+[submodule "aruco_ros"]
+	path = src/aruco_ros
+	url = https://github.com/immersive-command-system/aruco_ros.git
+
 [submodule "catkin_boost_python_buildtool"]
 	path = src/catkin_boost_python_buildtool
 	url = https://github.com/ethz-asl/catkin_boost_python_buildtool.git
