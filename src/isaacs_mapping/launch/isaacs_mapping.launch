@@ -4,7 +4,7 @@
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
   
   <!-- VOXBLOX -->
-  <include file="$(find voxblox_ros)/launch/zed_voxblox.launch"/>
+  <include file="$(find isaacs_mapping)/launch/zed_voxblox.launch"/>
   
   <!-- ZED 2 -->
   <include file="$(find zed_wrapper)/launch/zed2.launch"/> 
