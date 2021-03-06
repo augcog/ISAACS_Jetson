@@ -54,3 +54,10 @@
 	path = src/zed-ros-wrapper
 	url = https://github.com/stereolabs/zed-ros-wrapper.git
 
+[submodule "Onboard-SDK-ROS"]
+	path = src/Onboard-SDK-ROS
+	url = https://github.com/dji-sdk/Onboard-SDK-ROS.git
+
+[submodule "nmea_msgs"]
+	path = src/nmea_msgs
+	url = https://github.com/ros-drivers/nmea_msgs
