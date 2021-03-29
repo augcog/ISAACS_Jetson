@@ -56,19 +56,19 @@ def try_set_pose(cap):
 	rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, markerLength, camera_matrix, dist_coeffs)
 
 	# we need a homogeneous matrix but OpenCV only gives us a 3x3 rotation matrix
-	rotation_matrix = np.array([[0, 0, 0, 0],
-				[0, 0, 0, 0],
-				[0, 0, 0, 0],
+	rotation_matrix = np.array([[0, 0, 0, tvec[0]],
+				[0, 0, 0, tvec[1]],
+				[0, 0, 0, tvec[2]],
 				[0, 0, 0, 1]],
 								        dtype=float)
 	rotation_matrix[:3, :3], _ = cv2.Rodrigues(rvec)
+	R = np.linalg.inv(rotation_matrix)
 
 	# convert the matrix to a quaternion
-	quaternion = tf.transformations.quaternion_from_matrix(rotation_matrix)
+	quaternion = tf.transformations.quaternion_from_matrix(R)
 
 	# To visualize in rviz, you can, for example, publish a PoseStamped message:
-
-	rpy_array.append([tvec[0], tvec[1], tvec[2], quaternion[0], quaternion[1], quaternion[2], quaternion[3]])
+	rpy_array.append([R[0][3], R[1][3], R[2][3], quaternion[0], quaternion[1], quaternion[2], quaternion[3]])
      
 	if len(rpy_array) >= 20:
 		last_arrays = rpy_array[-3:]
