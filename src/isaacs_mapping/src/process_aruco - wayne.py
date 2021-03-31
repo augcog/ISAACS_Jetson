@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import PointCloud2
 import csv
 import math
 from zed_interfaces.srv import *
@@ -12,7 +13,9 @@ import tf
 # w = csv.writer(open('datafile.csv', 'a'))
 rpy_array = []
 pose_is_set = False
+publisher = None
 
+'''
 def setZEDPose(pos_x, pos_y, pos_z, o_x, o_y, o_z, o_w):
     global pose_is_set
     roll, pitch, yaw = eupter_from_quaternion(o_x, o_y, o_z, o_w)
@@ -24,8 +27,19 @@ def setZEDPose(pos_x, pos_y, pos_z, o_x, o_y, o_z, o_w):
         pose_is_set = True
         return ret
     except rospy.ServiceException as e:
-        print("Service call failed: %s"%e)
+        print("Service call failed: %s"%e)'''
 
+
+def convert_zed_pose(pointcloud_data):
+	if(not pose_is_set):
+		return 
+	global publisher
+	print("Im called")
+	pointcloud_data.data = convert_point_clouds(pointcloud_data.data)
+	publisher.publish(pointcloud_data) 
+
+def convert_point_clouds(data):
+	return data
 
 def try_set_pose(cap):
 
@@ -42,7 +56,7 @@ def try_set_pose(cap):
 	# Capture frame-by-frame, take only left camera image
 	ret, frame = cap.read()
 	#frame = np.split(frame, 2, axis=1)[0]
-	cv2.imshow('zed', frame)
+	#cv2.imshow('zed', frame)
 
 	# Our operations on the frame come here
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -100,20 +114,23 @@ def try_set_pose(cap):
 
 def track_marker():
 	global pose_is_set
-	
+	global publisher
 	print("Waiting for services...")
 	#rospy.wait_for_service('/zed2/zed_node/set_pose')
 	#rospy.wait_for_service('/zed2/zed_node/start_3d_mapping')
 	print("Services Ready!")
-	#rospy.init_node('tracking_data', anonymous=True)
-    #rospy.Subscriber('/aruco_single/pose', PoseStamped, callback)
+	
+	rospy.init_node('tracking_data', anonymous=True)
+	rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, convert_zed_pose)
+	publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
 
+	pose_is_set = True
+	'''
 	cap = cv2.VideoCapture(0, cv2.CAP_V4L)
-
 	
 	while not pose_is_set:
 		try_set_pose(cap)
-	
+	'''
 	rospy.spin()
 
 # source: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
