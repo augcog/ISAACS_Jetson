@@ -13,6 +13,7 @@ import tf
 
 # w = csv.writer(open('datafile.csv', 'a'))
 rpy_array = []
+R_array = []
 pose_is_set = False
 publisher = None
 conversion_matrix = [[1, 0, 0, 0], 
@@ -57,10 +58,10 @@ def convert_point_clouds(pointcloud_data):
 def try_set_pose(cap):
 
 	print("allen yang <3")
-	camera_matrix = np.matrix([[1057.12, 0, 1131.19] ,
-								[0, 1056.68, 614.561],
+	camera_matrix = np.matrix([[528.85, 0, 648.825] ,
+								[0, 528.49, 363.0625],
 								[0, 0, 1]])	
-	dist_coeffs = np.array([-0.0411877, 0.00998836, 0.00035581, 0.000354927, -0.00480993])
+	dist_coeffs = np.array([-0.0445958, 0.0145996, -0.00654037, -0.000450176, 0.000393205])
 
 	print("camera_matrix: " + str(camera_matrix))
 	print("dist_coeffs: " + str(dist_coeffs))
@@ -90,13 +91,23 @@ def try_set_pose(cap):
 								        dtype=float)
 	rotation_matrix[:3, :3], _ = cv2.Rodrigues(rvec)
 	R = np.linalg.inv(rotation_matrix)
+	R_array.append(R)
 
 	# convert the matrix to a quaternion
 	quaternion = tf.transformations.quaternion_from_matrix(R)
 
 	# To visualize in rviz, you can, for example, publish a PoseStamped message:
 	rpy_array.append([R[0][3], R[1][3], R[2][3], quaternion[0], quaternion[1], quaternion[2], quaternion[3]])
-     
+
+	#get average R
+	global conversion_matrix
+	if len(R_array) >= 20: 
+		R_sum = R_array[0]
+		for i in range(1, len(R_array)):
+			R_sum += R_array[i]
+		conversion_matrix = R_sum / len(len(R_array))
+		pose_is_set = True
+
 	if len(rpy_array) >= 20:
 		last_arrays = rpy_array[-3:]
 		s0, s1, s2, s3, s4, s5, s6 = 0, 0, 0, 0, 0, 0, 0  # sums
