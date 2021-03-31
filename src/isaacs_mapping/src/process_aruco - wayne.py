@@ -2,6 +2,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import PointCloud2
+from sensor_msgs import point_cloud2
 import csv
 import math
 from zed_interfaces.srv import *
@@ -14,6 +15,10 @@ import tf
 rpy_array = []
 pose_is_set = False
 publisher = None
+conversion_matrix = [[1, 0, 0, 0], 
+					[0, 1, 0, 0], 
+					[0, 0, 1, 0], 
+					[0, 0, 0, 1]]
 
 '''
 def setZEDPose(pos_x, pos_y, pos_z, o_x, o_y, o_z, o_w):
@@ -35,11 +40,19 @@ def convert_zed_pose(pointcloud_data):
 		return 
 	global publisher
 	print("Im called")
-	pointcloud_data.data = convert_point_clouds(pointcloud_data.data)
+	pointcloud_data = convert_point_clouds(pointcloud_data)
 	publisher.publish(pointcloud_data) 
 
-def convert_point_clouds(data):
-	return data
+def convert_point_clouds(pointcloud_data):
+	global conversion_matrix
+	reader = point_cloud2.read_points(pointcloud_data, skip_nans=True)
+	new_points = []
+	for p in reader:
+		#transfer point to aruco marker's corrdinate system
+		new_p = list(np.matmul(conversion_matrix, [p[0], p[1], p[2], 1]))
+		print(new_p[0:3] + [list(p)[3:]])
+		new_points.append(new_p[0:3] + list(p)[3:])
+	return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
 
 def try_set_pose(cap):
 
@@ -124,13 +137,13 @@ def track_marker():
 	rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, convert_zed_pose)
 	publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
 
-	pose_is_set = True
-	'''
+	#pose_is_set = True
+	
 	cap = cv2.VideoCapture(0, cv2.CAP_V4L)
 	
 	while not pose_is_set:
 		try_set_pose(cap)
-	'''
+	
 	rospy.spin()
 
 # source: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
