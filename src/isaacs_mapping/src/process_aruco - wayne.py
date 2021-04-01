@@ -18,6 +18,7 @@ R_array = []
 pose_is_set = False
 image_subsriber = None
 publisher = None
+image_publisher = None
 conversion_matrix = [[1, 0, 0, 0], 
 					[0, 1, 0, 0], 
 					[0, 0, 1, 0], 
@@ -53,17 +54,17 @@ def convert_point_clouds(pointcloud_data):
 	for p in reader:
 		#transfer point to aruco marker's corrdinate system
 		new_p = list(np.matmul(conversion_matrix, [p[0], p[1], p[2], 1]))
-		print(new_p[0:3] + [list(p)[3:]])
+		#print(new_p[0:3] + [list(p)[3:]])
 		new_points.append(new_p[0:3] + list(p)[3:])
 	return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
 
 def try_set_pose(image):
 
 	#print("allen yang <3")
-	camera_matrix = np.matrix([[528.85, 0, 648.825] ,
-								[0, 528.49, 363.0625],
-								[0, 0, 1]])	
-	dist_coeffs = np.array([-0.0445958, 0.0145996, -0.00654037, -0.000450176, 0.000393205])
+	camera_matrix = np.matrix([[519.5537109375, 0.0, 656.6468505859375], 
+								[0.0, 519.5537109375, 363.6219482421875], 
+								[0.0, 0.0, 1.0]])	
+	dist_coeffs = np.array([0, 0, 0, 0, 0])
 
 	#print("camera_matrix: " + str(camera_matrix))
 	#print("dist_coeffs: " + str(dist_coeffs))
@@ -72,21 +73,25 @@ def try_set_pose(image):
 	# Capture frame-by-frame, take only left camera image
 	#ret, frame = cap.read()
 	frame = image
+
 	#frame = np.split(frame, 2, axis=1)[0]
 	#cv2.imshow('zed', frame)
 	# Our operations on the frame come here
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
+
+	aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
 	parameters =  cv2.aruco.DetectorParameters_create()
 
 	#lists of ids and the corners belonging to each id
-	corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+	corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary=aruco_dict, cameraMatrix=camera_matrix,distCoeff=dist_coeffs)
 	markerLength = 0.16
 
 	rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, markerLength, camera_matrix, dist_coeffs)
 	if(rvec is None or tvec is None):
 		return False
 	print("rvec not None here:", rvec)
+	rvec = rvec[0][0]
+	tvec = tvec[0][0]
 	# we need a homogeneous matrix but OpenCV only gives us a 3x3 rotation matrix
 	rotation_matrix = np.array([[0, 0, 0, tvec[0]],
 				[0, 0, 0, tvec[1]],
@@ -103,7 +108,7 @@ def try_set_pose(image):
 		R_sum = R_array[0]
 		for i in range(1, len(R_array)):
 			R_sum += R_array[i]
-		conversion_matrix = R_sum / len(len(R_array))
+		conversion_matrix = R_sum / len(R_array)
 		return True
 	return False
 '''
@@ -143,11 +148,12 @@ def try_set_pose(image):
 def process_image(image_data):
 	image_serialized = np.fromstring(image_data.data, np.uint8)#np.frombuffer(data.data, dtype=np.uint8).reshape(data.height, data.width, -1)
 	image_deserialized = cv2.imdecode(image_serialized, cv2.IMREAD_COLOR)
-	print("getting image")
 	global pose_is_set
 	global image_subsriber
+	global image_publisher
 	if(pose_is_set):
 		return
+
 	if(try_set_pose(image_deserialized)):
 		print("finish set pose")
 		pose_is_set = True
@@ -167,7 +173,7 @@ def track_marker():
 	rospy.init_node('tracking_data', anonymous=True)
 	image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color/compressed', CompressedImage, process_image)
 	publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
-	
+	image_publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
 	rospy.spin()
 	#pose_is_set = True
 	
