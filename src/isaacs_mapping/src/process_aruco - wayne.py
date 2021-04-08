@@ -3,6 +3,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
 from sensor_msgs import point_cloud2
 import csv
 import math
@@ -45,31 +46,41 @@ def convert_zed_pose(pointcloud_data):
 	if(not pose_is_set):
 		return 
 	global publisher
-	print("Im called")
 	pointcloud_data = convert_point_clouds(pointcloud_data)
 	publisher.publish(pointcloud_data) 
 
 def convert_point_clouds(pointcloud_data):
 	global conversion_matrix
-	reader = point_cloud2.read_points(pointcloud_data, skip_nans=True)
+	reader = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z", "rgb"], skip_nans=True)
+	#reader2 = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z"], skip_nans=True)
 	new_points = []
 	for p in reader:
 		#transfer point to aruco marker's corrdinate system
 		new_p = list(np.matmul(conversion_matrix, [p[0], p[1], p[2], 1]))
-		new_points.append(new_p[0:3] + list(p)[3:])
+		new_p = list([new_p[0], new_p[1], new_p[2]]/new_p[3])
+		new_p.append(p[3])
+		new_points.append(new_p)
 	return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
 
 def try_set_pose(image):
 
 	#print("allen yang <3")
+	
+	#shubha camera
+	'''
+ 	camera_matrix = np.matrix([[528.56, 0.0, 652.095], 
+								[0.0, 528.34, 355.2805], 
+								[0.0, 0.0, 1.0]])
+	dist_coeffs = np.array([-0.0411877, 0.00998836, -0.00480993, 0.00035581, 0.000354927])
+	'''
+	#nitzan camera
 	camera_matrix = np.matrix([[519.5537109375, 0.0, 656.6468505859375], 
 								[0.0, 519.5537109375, 363.6219482421875], 
-								[0.0, 0.0, 1.0]])	
-	dist_coeffs = np.array([0, 0, 0, 0, 0])
-
+								[0.0, 0.0, 1.0]])
+	dist_coeffs = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
 	#print("camera_matrix: " + str(camera_matrix))
 	#print("dist_coeffs: " + str(dist_coeffs))
-
+	
 	frame = image
 
 	# Our operations on the frame come here
@@ -79,25 +90,34 @@ def try_set_pose(image):
 	parameters =  cv2.aruco.DetectorParameters_create()
 
 	#lists of ids and the corners belonging to each id
-	corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary=aruco_dict, cameraMatrix=camera_matrix,distCoeff=dist_coeffs)
-	markerLength = 0.08
+	corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary=aruco_dict, parameters = parameters)
+	markerLength = 0.2
 
-	rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, markerLength, camera_matrix, dist_coeffs)
-	if(rvec is None or tvec is None):
+
+	if(ids is None):
 		return False
+	rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, markerLength, camera_matrix, dist_coeffs)
 	rvec = rvec[0][0]
 	tvec = tvec[0][0]
+
+	#visualize image
+	'''
+	cv2.aruco.drawAxis(image, camera_matrix, dist_coeffs,rvec,tvec, markerLength)
+	cv2.aruco.drawDetectedMarkers(image, corners)
+	cv2.imshow('image',image) 
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()'''
+
 	# we need a homogeneous matrix but OpenCV only gives us a 3x3 rotation matrix
-	rotation_matrix = np.array([[0, 0, 0, tvec[0]],
-				[0, 0, 0, tvec[1]],
-				[0, 0, 0, tvec[2]],
-				[0, 0, 0, 1]],
-								        dtype=float)
-	rotation_matrix[:3, :3], _ = cv2.Rodrigues(rvec) #marker in camera coordinate system 
+	rotation_matrix = np.identity(4)
+	rmat = cv2.Rodrigues(rvec)[0]
+	rotation_matrix[:3, :3] = rmat #marker in camera coordinate system 
+	rotation_matrix[:3, 3] = tvec
 	R = np.linalg.inv(rotation_matrix)
 
 	#get average R
 	global conversion_matrix
+	'''
 	#when we detect marker camera is not at (0,0,0), need to take camera's pose into account
 	global camera_pose
 	camera_R = np.array([[0, 0, 0, camera_pose.position.x],
@@ -108,7 +128,20 @@ def try_set_pose(image):
 	camera_rvec = euler_from_quaternion(camera_pose.orientation.x, camera_pose.orientation.y, 
 										camera_pose.orientation.z, camera_pose.orientation.w)
 	camera_R[:3, :3], _ = cv2.Rodrigues(camera_rvec)
-	camera_R = np.linalg.inv(camera_R)
+	#camera_R = np.linalg.inv(camera_R)
+	# '''
+	'''
+	Rcc = np.array([[0, 0, 1, 0],
+					[-1, 0, 0, 0],
+					[0, -1, 0, 0],
+					[0, 0, 0, 1]])	
+	'''
+	Rcc = np.array([[0, -1, 0, 0],
+				    [0, 0, -1, 0],
+				    [1, 0, 0, 0],
+				    [0, 0, 0, 1]])		
+	conversion_matrix = np.matmul(R, Rcc)
+	'''
 	R_array.append(R)
 
 	if len(R_array) >= 20: 
@@ -119,10 +152,13 @@ def try_set_pose(image):
 		conversion_matrix = R_sum / len(R_array)
 		return True
 	return False
+	'''
+	return True
 
 def process_image(image_data):
-	image_serialized = np.fromstring(image_data.data, np.uint8)#np.frombuffer(data.data, dtype=np.uint8).reshape(data.height, data.width, -1)
-	image_deserialized = cv2.imdecode(image_serialized, cv2.IMREAD_COLOR)
+	image_deserialized = np.frombuffer(image_data.data, dtype=np.uint8).reshape(image_data.height, image_data.width, -1)
+	#image_serialized = np.fromstring(image_data.data, np.uint8)
+	#image_deserialized = cv2.imdecode(image_serialized, cv2.IMREAD_COLOR)
 	global pose_is_set
 	global image_subsriber
 	global pose_subsriber
@@ -139,8 +175,12 @@ def process_image(image_data):
 
 def update_camera_pose(data):
 	global camera_pose
+	global conversion_matrix
 	camera_pose = data.pose
-	#print(camera_pose)
+	#print out camera's position in world coordinate system 
+	if(pose_is_set):
+		convertedCameraPose = np.array([camera_pose.position.x, camera_pose.position.y, camera_pose.position.z, 1])
+		print("camera world pos:", np.matmul(conversion_matrix , convertedCameraPose))
 
 def track_marker():
 	global pose_is_set
@@ -153,7 +193,9 @@ def track_marker():
 	print("Services Ready!")
 	
 	rospy.init_node('tracking_data', anonymous=True)
-	image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color/compressed', CompressedImage, process_image)
+	
+	#image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color/compressed', CompressedImage, process_image)
+	image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color', Image, process_image)
 	pose_subsriber = rospy.Subscriber('/zed2/zed_node/pose', PoseStamped, update_camera_pose)
 	publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
 	image_publisher = rospy.Publisher('converted_cloud', PointCloud2, queue_size=10)
