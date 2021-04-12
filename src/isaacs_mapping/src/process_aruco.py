@@ -35,8 +35,6 @@ class PointCloudCamToMarkerConverter:
 		self.camera_dist_coeffs = SETTINGS["camera_dist_coeffs"]
 		self.camera_extrinsic = SETTINGS["camera_extrinsic"]
 
-		self.rpy_array = []
-		self.R_array = []
 		self.pose_is_set = False
 		self.image_subsriber = None
 		self.pose_subsriber = None
@@ -49,7 +47,7 @@ class PointCloudCamToMarkerConverter:
 								[0, 0, 1, 0], 
 								[0, 0, 0, 1]]
 		
-		self.calibrate_initial_pos = False
+		self.calibrate_initial_pos = False #currently we assume camera is at its origin when detects the marker
 		self.print_camera_pos = print_cam_location
 		self.image_compressed = image_is_compressed
 		self.show_marker_UI = show_marker_UI
@@ -148,30 +146,19 @@ class PointCloudCamToMarkerConverter:
 					[0, 0, 0, self.camera_pose.position.z],
 					[0, 0, 0, 1]],
 									dtype=float)
-			camera_rvec = euler_from_quaternion(camera_pose.orientation.x, camera_pose.orientation.y, 
-												camera_pose.orientation.z, camera_pose.orientation.w)
+			camera_rvec = PointCloudCamToMarkerConverter.euler_from_quaternion(self.camera_pose.orientation.x, self.camera_pose.orientation.y, 
+												self.camera_pose.orientation.z, self.camera_pose.orientation.w)
 			camera_R[:3, :3], _ = cv2.Rodrigues(camera_rvec)
 			camera_R = np.linalg.inv(camera_R)
 			camera_R = np.matmul(camera_R, self.camera_extrinsic)
 			self.conversion_matrix = np.matmul(np.matmul(cam2marker, zed2cam), camera_R)
 		else:
 			self.conversion_matrix = np.matmul(cam2marker, zed2cam)
-		'''
-		R_array.append(np.matmul(cam2marker, zed2cam))
-
-		if len(R_array) >= 20: 
-			R_sum = R_array[0]
-			for i in range(1, len(R_array)):
-				print(i, R_array[i])
-				R_sum += R_array[i]
-			conversion_matrix = R_sum / len(R_array)
-			return True
-		return False
-		'''
 		return True
 
 	# source: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
-	def euler_from_quaternion(self, x, y, z, w):
+	@staticmethod
+	def euler_from_quaternion(x, y, z, w):
 			"""
 			Convert a quaternion into euler angles (roll, pitch, yaw)
 			roll is rotation around x in radians (counterclockwise)
