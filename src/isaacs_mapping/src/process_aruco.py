@@ -42,7 +42,7 @@ class PointCloudCamToMarkerConverter:
 		self.pointcloud_publisher = None
 		self.converted_point_cloud_node = SETTINGS["converted_point_cloud_node"]
 		self.camera_pose = None
-		self.conversion_matrix = [[1, 0, 0, 0], 
+		self.zed2marker = [[1, 0, 0, 0], #the zed2marker conversion matrix
 								[0, 1, 0, 0], 
 								[0, 0, 1, 0], 
 								[0, 0, 0, 1]]
@@ -52,8 +52,10 @@ class PointCloudCamToMarkerConverter:
 		self.image_compressed = image_is_compressed
 		self.show_marker_UI = show_marker_UI
 
-	def track_marker(self):		
+
+	def start(self):		
 		rospy.init_node('tracking_data', anonymous=True)
+		#create the subscribers needed for detecting marker and set pose
 		if(self.image_compressed):
 			self.image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color/compressed', CompressedImage, self.process_image)
 		else:
@@ -62,52 +64,82 @@ class PointCloudCamToMarkerConverter:
 		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size=10)
 		rospy.spin()
 
+	"""Called when receiving an image message from Zed. Use the image to detect marker and set pose."""
 	def process_image(self, image_data):
+		if(self.pose_is_set):
+			return
+		#deserialize the image so it can be used for OpenCV ArUco marker detection
 		if(self.image_compressed):
 			image_serialized = np.fromstring(image_data.data, np.uint8)
 			image_deserialized = cv2.imdecode(image_serialized, cv2.IMREAD_COLOR)
 		else:
 			image_deserialized = np.frombuffer(image_data.data, dtype=np.uint8).reshape(image_data.height, image_data.width, -1)
-
-		if(self.pose_is_set):
-			return
-
+		
 		if(self.try_set_pose(image_deserialized)):
 			print("finish set pose")
 			self.pose_is_set = True
+			#after pose is set, update the subscriber and keep/create the ones needed for converting point clouds
 			self.image_subsriber.unregister()
 			if(not self.print_camera_pos):
 				self.pose_subsriber.unregister()
 			self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, self.convert_zed_pose)
 
+	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
 		self.camera_pose = data.pose
 		#print out camera's position in world coordinate system 
 		if(self.print_camera_pos and self.pose_is_set):
 			converted_camera_pose = np.array([self.camera_pose.position.x, self.camera_pose.position.y, self.camera_pose.position.z, 1])
-			print("camera world pos:", np.matmul(self.conversion_matrix , converted_camera_pose))
+			print("camera world pos:", np.matmul(self.zed2marker , converted_camera_pose))
 
+	"""Called when receiving a pointcloud message from Zed. It converts point clouds' positions to marker coordinate system, 
+	and publishs the converted point clouds to a new ros node."""
 	def convert_zed_pose(self, pointcloud_data):
 		if(not self.pose_is_set):
 			return 
 		pointcloud_data = self.convert_point_clouds(pointcloud_data)
 		self.pointcloud_publisher.publish(pointcloud_data) 
 
+	"""Helper function that loops through all the point clouds and convert their position to the marker coordinate system. """
 	def convert_point_clouds(self, pointcloud_data):
 		reader = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z", "rgb"], skip_nans=True)
 		new_points = []
 		for p in reader:
 			#transfer point to aruco marker's corrdinate system
-			new_p = list(np.matmul(self.conversion_matrix, [p[0], p[1], p[2], 1]))
+			new_p = list(np.matmul(self.zed2marker, [p[0], p[1], p[2], 1]))
 			new_p = list([new_p[0], new_p[1], new_p[2]]/new_p[3])
 			new_p.append(p[3])
 			new_points.append(new_p)
 		return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
 
+	"""Get an image as input and trys to calculate the zed to marker transformation matrix"""
 	def try_set_pose(self,image):				
-		frame = image
+		opencv_cam2marker = self.detect_marker(image)
+		
+		zed2cam = np.array([[0, -1, 0, 0], #zed camera coordinate system to opencv camera coordinate system
+							[0, 0, -1, 0],
+							[1, 0, 0, 0],
+							[0, 0, 0, 1]])	
+		if(self.calibrate_initial_pos):
+			#when we detect marker zed camera may not be at the original of zed camera coordinate system, need to take camera's pose into account
+			camera_R = np.array([[0, 0, 0, self.camera_pose.position.x],
+					[0, 0, 0, self.camera_pose.position.y],
+					[0, 0, 0, self.camera_pose.position.z],
+					[0, 0, 0, 1]],
+									dtype=float)
+			camera_rvec = PointCloudCamToMarkerConverter.euler_from_quaternion(self.camera_pose.orientation.x, self.camera_pose.orientation.y, 
+												self.camera_pose.orientation.z, self.camera_pose.orientation.w)
+			camera_R[:3, :3], _ = cv2.Rodrigues(camera_rvec)
+			camera_R = np.linalg.inv(camera_R)
+			camera_R = np.matmul(camera_R, self.camera_extrinsic)
+			self.zed2marker = np.matmul(np.matmul(opencv_cam2marker, zed2cam), camera_R)
+		else:
+			self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)
+		return True
 
-		# Our operations on the frame come here
+	"""Detect the marker in the image and return the opencv camera to marker transformation matrix."""
+	def detect_marker(self, image):
+		frame = image
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		aruco_dictionary = cv2.aruco.Dictionary_get(self.aruco_dict)
 		aruco_parameters =  cv2.aruco.DetectorParameters_create()
@@ -128,33 +160,12 @@ class PointCloudCamToMarkerConverter:
 			cv2.waitKey(0)
 			cv2.destroyAllWindows()
 
-		# we need a homogeneous matrix but OpenCV only gives us a 3x3 rotation matrix
 		rotation_matrix = np.identity(4)
 		rmat = cv2.Rodrigues(rvec)[0]
-		rotation_matrix[:3, :3] = rmat #marker in camera coordinate system 
+		rotation_matrix[:3, :3] = rmat  
 		rotation_matrix[:3, 3] = tvec
-		cam2marker = np.linalg.inv(rotation_matrix)
-		
-		zed2cam = np.array([[0, -1, 0, 0],
-							[0, 0, -1, 0],
-							[1, 0, 0, 0],
-							[0, 0, 0, 1]])	
-		if(self.calibrate_initial_pos):
-			#when we detect marker camera is not at (0,0,0), need to take camera's pose into account
-			camera_R = np.array([[0, 0, 0, self.camera_pose.position.x],
-					[0, 0, 0, self.camera_pose.position.y],
-					[0, 0, 0, self.camera_pose.position.z],
-					[0, 0, 0, 1]],
-									dtype=float)
-			camera_rvec = PointCloudCamToMarkerConverter.euler_from_quaternion(self.camera_pose.orientation.x, self.camera_pose.orientation.y, 
-												self.camera_pose.orientation.z, self.camera_pose.orientation.w)
-			camera_R[:3, :3], _ = cv2.Rodrigues(camera_rvec)
-			camera_R = np.linalg.inv(camera_R)
-			camera_R = np.matmul(camera_R, self.camera_extrinsic)
-			self.conversion_matrix = np.matmul(np.matmul(cam2marker, zed2cam), camera_R)
-		else:
-			self.conversion_matrix = np.matmul(cam2marker, zed2cam)
-		return True
+		return np.linalg.inv(rotation_matrix) #opencv camera coordinate system to marker coordinate system, this camera is not zed camera
+
 
 	# source: https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
 	@staticmethod
@@ -183,4 +194,4 @@ class PointCloudCamToMarkerConverter:
 if __name__ == '__main__':
 	print('Node to write tracked data started .......')
 	converter = PointCloudCamToMarkerConverter()
-	converter.track_marker()
+	converter.start()
