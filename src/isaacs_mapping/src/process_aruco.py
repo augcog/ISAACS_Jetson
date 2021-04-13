@@ -121,6 +121,8 @@ class PointCloudCamToMarkerConverter:
 							[1, 0, 0, 0],
 							[0, 0, 0, 1]])	
 		if(self.calibrate_initial_pos):
+			if(self.camera_pose is None):
+				return False
 			#when we detect marker zed camera may not be at the original of zed camera coordinate system, need to take camera's pose into account
 			camera_R = np.array([[0, 0, 0, self.camera_pose.position.x],
 					[0, 0, 0, self.camera_pose.position.y],
