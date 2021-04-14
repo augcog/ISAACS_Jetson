@@ -98,26 +98,26 @@ To be expanded...but in short:
  6. Play a ROSBag on ROS computer
  7. View meshes in Unity
 
-### Create Mesh in ArUco marker coordinate system
-Here are relevant files:
+### Create meshes in the ArUco marker coordinate system
+Here are the relevant files:
  1. src\isaacs_mapping\launch\isaacs_mapping.launch
  2. src\isaacs_mapping\launch\zed_voxblox.launch
  3. src\isaacs_mapping\src\process_aruco.py
 
-Zed camera needs to publish the following topics:
+The ZED 2 camera needs to publish the following topics:
  1. Point Cloud: '/zed2/zed_node/mapping/fused_cloud'
  2. Image: '/zed2/zed_node/rgb/image_rect_color' or '/zed2/zed_node/rgb/image_rect_color/compressed'
 
-The script subscribes to topics published by the ZED camera. It uses the images to detect ArUco marker, and converts point clouds to the marker coordinate systems by changeing their positions and publish new point clouds to a new topic. The voxblox has been set up to generate mesh based on this new point cloud topic. By default the script is receiving non-compressed images. If you want to use compressed images instead, at the end of process_aruco.py use PointCloudCamToMarkerConverter(image_is_compressed = True) to create the converter object.
+The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses the images to detect ArUco markers and converts point clouds to the marker coordinate system by changing their positions and publishing the resulting new point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
 
-Following these steps to run the script:
- 1. Get IP address of ROS computer
- 2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
+Follow these steps to run the script:
+ 1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
+ 2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
  3. Configure sensors in the same inspector window to visualize data of type Mesh
- 4. Turn on ROSBridge on ROS computer: `roslaunch rosbridge_server rosbridge_websocket.launch`
- 5. Hit "play" in Unity. Unity will attempt to connect to ROS Bridge. Look at ROSBridge terminal for confirmation that client has subscribed to correct rostopics.
+ 4. Turn on rosbridge on ROS computer to stream data from the drone-based compute unit to Unity: `roslaunch rosbridge_server rosbridge_websocket.launch`
+ 5. Hit the "play" button in Unity. Unity will attempt to connect to your drone computer via rosbridge. Check your rosbridge terminal on the drone computer for confirmation that the Unity client has subscribed to the correct rostopics.
  6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping.launch`
- 7. Play a ROSBag on ROS computer or use the ZED camera connected to ros computer to do 3d reconstruction. 
+ 7. Play a rosbag on the drone computer or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
  8. View meshes in Unity
 
 ## Help
@@ -134,6 +134,5 @@ Following these steps to run the script:
 ### Tips & tricks
 - **Want to see info about *catkin build* beforehand?** Use `catkin build --dry-run`
 - **If you want to install new ros packages:** that don't have installation instructions, they would either be a git repo you need to clone, or the BETTER way is through an apt-get installation, like we installed **ros bridge** above. Sometimes you gotta guess the name so usually it follows this format `sudo apt-get install ros-<ROS_version>-<package_name>`. Google around!
-
 
 

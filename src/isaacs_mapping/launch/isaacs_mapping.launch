@@ -11,12 +11,8 @@
   	<include file="$(find zed_wrapper)/launch/zed2.launch"/>  
   -->
   
-  <!-- ARUCO DETECTION 
-  	<include file="$(find my_aruco_tracker)/launch/aruco_marker_finder.launch"/> 
-  -->
   
   <!-- ARUCO POSE PROCESSING -->
   <node name="aruco_pose" pkg="isaacs_mapping" type="process_aruco.py" output="screen"/>
 
-  
 </launch>
