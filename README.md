@@ -104,11 +104,11 @@ Here are relevant files:
  2. src\isaacs_mapping\launch\zed_voxblox.launch
  3. src\isaacs_mapping\src\process_aruco.py
 
-Zed camera needs to public the following topics:
+Zed camera needs to publish the following topics:
  1. Point Cloud: '/zed2/zed_node/mapping/fused_cloud'
  2. Image: '/zed2/zed_node/rgb/image_rect_color' or '/zed2/zed_node/rgb/image_rect_color/compressed'
 
-The script subscribes to topics published by the ZED camera. It uses the images to detect ArUco marker, and convert point clouds to the marker coordinate systems by changeing their positions and publish them to a new topic. The voxblox has been set up to subscribe to this new point cloud topic and generate mesh based on it. By default the script is trying to receive non-compressed images. If you want to use Compressed Image instead, at the end of process_aruco.py when creating PointCloudCamToMarkerConverter use PointCloudCamToMarkerConverter(image_is_compressed = True).
+The script subscribes to topics published by the ZED camera. It uses the images to detect ArUco marker, and converts point clouds to the marker coordinate systems by changeing their positions and publish new point clouds to a new topic. The voxblox has been set up to generate mesh based on this new point cloud topic. By default the script is receiving non-compressed images. If you want to use compressed images instead, at the end of process_aruco.py use PointCloudCamToMarkerConverter(image_is_compressed = True) to create the converter object.
 
 Following these steps to run the script:
  1. Get IP address of ROS computer
