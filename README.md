@@ -100,9 +100,9 @@ To be expanded...but in short:
 
 ## Create meshes in the ArUco marker coordinate system
 Here are the relevant files:
- 1. src\isaacs_mapping\launch\isaacs_mapping.launch or src\isaacs_mapping\launch\isaacs_mapping_camera.launch
- 2. src\isaacs_mapping\launch\zed_voxblox.launch
- 3. src\isaacs_mapping\src\process_aruco.py or src\isaacs_mapping\src\process_aruco_camera.py
+ 1. src/isaacs_mapping/launch/isaacs_mapping.launch or src/isaacs_mapping/launch/isaacs_mapping_camera.launch
+ 2. src/isaacs_mapping/launch/zed_voxblox.launch
+ 3. src/isaacs_mapping/src/process_aruco.py or src/isaacs_mapping/src/process_aruco_camera.py
 
 The ZED 2 camera needs to publish the following topics:
  1. Point Cloud: /zed2/zed_node/mapping/fused_cloud
