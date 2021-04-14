@@ -98,18 +98,21 @@ To be expanded...but in short:
  6. Play a ROSBag on ROS computer
  7. View meshes in Unity
 
-### Create meshes in the ArUco marker coordinate system
+## Create meshes in the ArUco marker coordinate system
 Here are the relevant files:
- 1. src\isaacs_mapping\launch\isaacs_mapping.launch
+ 1. src\isaacs_mapping\launch\isaacs_mapping.launch or src\isaacs_mapping\launch\isaacs_mapping_camera.launch
  2. src\isaacs_mapping\launch\zed_voxblox.launch
- 3. src\isaacs_mapping\src\process_aruco.py
+ 3. src\isaacs_mapping\src\process_aruco.py or src\isaacs_mapping\src\process_aruco_camera.py
 
 The ZED 2 camera needs to publish the following topics:
  1. Point Cloud: '/zed2/zed_node/mapping/fused_cloud'
  2. Image: '/zed2/zed_node/rgb/image_rect_color' or '/zed2/zed_node/rgb/image_rect_color/compressed'
 
-The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses the images to detect ArUco markers and converts point clouds to the marker coordinate system by changing their positions and publishing the resulting new point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
+Here is the general workflow for this process. The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses images from the camera to detect ArUco markers and converts point clouds to the marker coordinate system by modifyng the point cloud positions to be centered around the ArUco marker. It publishes the resulting modified point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
 
+We provide to methods to run this process— one with live input from a ZED camera and another with prerecorded input from the ZED camera which is stored in the form of rosbags. We provide two sets of the necessary scripts to allow users to choose to use either method. The scripts specified for live camera usage have "camera" appended onto their file names.
+
+### Using Pre-recorded Rosbags
 Follow these steps to run the script:
  1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
  2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
@@ -120,9 +123,23 @@ Follow these steps to run the script:
  7. Play a rosbag on the drone computer or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
  8. View meshes in Unity
 
-## Help
+### Using Live Input From the ZED Camera
+*TO DO*
 
-### Troubleshooting
+Follow these steps to run the script:
+ 1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
+ 2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
+ 3. Configure sensors in the same inspector window to visualize data of type Mesh
+ 4. Turn on rosbridge on ROS computer to stream data from the drone-based compute unit to Unity: `roslaunch rosbridge_server rosbridge_websocket.launch`
+ 5. Hit the "play" button in Unity. Unity will attempt to connect to your drone computer via rosbridge. Check your rosbridge terminal on the drone computer for confirmation that the Unity client has subscribed to the correct rostopics.
+ 6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping_camera.launch`
+ 7. Play a rosbag on the drone computer or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
+ 8. View meshes in Unity
+
+## Help
+*TO DO*
+
+## Troubleshooting
 - Just try this again `source ~/ros_catkin_ws/devel/setup.bash`
 - Restart your computer
 - **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
