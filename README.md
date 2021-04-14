@@ -99,20 +99,26 @@ To be expanded...but in short:
  7. View meshes in Unity
 
 ### Create Mesh in ArUco marker coordinate system
+Here are relevant files:
+ 1. src\isaacs_mapping\launch\isaacs_mapping.launch
+ 2. src\isaacs_mapping\launch\zed_voxblox.launch
+ 3. src\isaacs_mapping\src\process_aruco.py
+
+Zed camera needs to public the following topics:
+ 1. Point Cloud: '/zed2/zed_node/mapping/fused_cloud'
+ 2. Image: '/zed2/zed_node/rgb/image_rect_color' or '/zed2/zed_node/rgb/image_rect_color/compressed'
+
+The script subscribes to topics published by the ZED camera. It uses the images to detect ArUco marker, and convert point clouds to the marker coordinate systems by changeing their positions and publish them to a new topic. The voxblox has been set up to subscribe to this new point cloud topic and generate mesh based on it. By default the script is trying to receive non-compressed images. If you want to use Compressed Image instead, at the end of process_aruco.py when creating PointCloudCamToMarkerConverter use PointCloudCamToMarkerConverter(image_is_compressed = True).
+
 Following these steps to run the script:
  1. Get IP address of ROS computer
  2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
  3. Configure sensors in the same inspector window to visualize data of type Mesh
  4. Turn on ROSBridge on ROS computer: `roslaunch rosbridge_server rosbridge_websocket.launch`
  5. Hit "play" in Unity. Unity will attempt to connect to ROS Bridge. Look at ROSBridge terminal for confirmation that client has subscribed to correct rostopics.
- 6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer: `roslaunch isaacs_mapping isaacs_mapping.launch`
+ 6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping.launch`
  7. Play a ROSBag on ROS computer or use the ZED camera connected to ros computer to do 3d reconstruction. 
  8. View meshes in Unity
-
- Here are the relevant files:
- 1. src\isaacs_mapping\launch\isaacs_mapping.launch
- 2. src\isaacs_mapping\launch\zed_voxblox.launch
- 3. src\isaacs_mapping\src\process_aruco.py
 
 ## Help
 
