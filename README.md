@@ -98,6 +98,22 @@ To be expanded...but in short:
  6. Play a ROSBag on ROS computer
  7. View meshes in Unity
 
+### Create Mesh in ArUco marker coordinate system
+Following these steps to run the script:
+ 1. Get IP address of ROS computer
+ 2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
+ 3. Configure sensors in the same inspector window to visualize data of type Mesh
+ 4. Turn on ROSBridge on ROS computer: `roslaunch rosbridge_server rosbridge_websocket.launch`
+ 5. Hit "play" in Unity. Unity will attempt to connect to ROS Bridge. Look at ROSBridge terminal for confirmation that client has subscribed to correct rostopics.
+ 6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer: `roslaunch isaacs_mapping isaacs_mapping.launch`
+ 7. Play a ROSBag on ROS computer or use the ZED camera connected to ros computer to do 3d reconstruction. 
+ 8. View meshes in Unity
+
+ Here are the relevant files:
+ 1. src\isaacs_mapping\launch\isaacs_mapping.launch
+ 2. src\isaacs_mapping\launch\zed_voxblox.launch
+ 3. src\isaacs_mapping\src\process_aruco.py
+
 ## Help
 
 ### Troubleshooting
@@ -112,8 +128,6 @@ To be expanded...but in short:
 ### Tips & tricks
 - **Want to see info about *catkin build* beforehand?** Use `catkin build --dry-run`
 - **If you want to install new ros packages:** that don't have installation instructions, they would either be a git repo you need to clone, or the BETTER way is through an apt-get installation, like we installed **ros bridge** above. Sometimes you gotta guess the name so usually it follows this format `sudo apt-get install ros-<ROS_version>-<package_name>`. Google around!
-
-
 
 
 
