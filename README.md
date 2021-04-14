@@ -105,8 +105,8 @@ Here are the relevant files:
  3. src\isaacs_mapping\src\process_aruco.py or src\isaacs_mapping\src\process_aruco_camera.py
 
 The ZED 2 camera needs to publish the following topics:
- 1. Point Cloud: '/zed2/zed_node/mapping/fused_cloud'
- 2. Image: '/zed2/zed_node/rgb/image_rect_color' or '/zed2/zed_node/rgb/image_rect_color/compressed'
+ 1. Point Cloud: /zed2/zed_node/mapping/fused_cloud
+ 2. Image: /zed2/zed_node/rgb/image_rect_color or /zed2/zed_node/rgb/image_rect_color/compressed
 
 Here is the general workflow for this process. The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses images from the camera to detect ArUco markers and converts point clouds to the marker coordinate system by modifyng the point cloud positions to be centered around the ArUco marker. It publishes the resulting modified point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
 
