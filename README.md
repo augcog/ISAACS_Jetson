@@ -112,17 +112,6 @@ Here is the general workflow for this process. The script 'process_aruco.py' sub
 
 This progarm can be run in two ways - one with live input from a ZED camera and another with prerecorded input from the ZED camera which is stored in the form of rosbags. In order to run one or the other, minor changes need to be made to the isaacs_mapping.launch file.
 
-Follow these steps to run the program:
- 1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
- 2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
- 3. Configure sensors in the same inspector window to visualize data of type Mesh
- 4. Turn on rosbridge on ROS computer to stream data from the drone-based compute unit to Unity: `roslaunch rosbridge_server rosbridge_websocket.launch`
- 5. Hit the "play" button in Unity. Unity will attempt to connect to your drone computer via rosbridge. Check your rosbridge terminal on the drone computer for confirmation that the Unity client has subscribed to the correct rostopics.
- 6. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping.launch`
- 7. Play a rosbag on the drone computer or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
- 8. View meshes in Unity
-
-
 Follow these steps to run the script:
  1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
  2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
@@ -135,7 +124,6 @@ Follow these steps to run the script:
  9. View meshes in Unity
 
 ## Help
-*TO DO*
 
 ## Troubleshooting
 - Just try this again `source ~/ros_catkin_ws/devel/setup.bash`
