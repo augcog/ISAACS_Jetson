@@ -88,7 +88,7 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
 
 ### ROS-Bridge + Unity Test
-This test will make sure you're able to connect Unity to the on-board computer over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
+This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
 To be expanded...but in short:
  1. Get IP address of ROS computer
  2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
