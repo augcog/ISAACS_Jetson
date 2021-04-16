@@ -119,7 +119,7 @@ Follow these steps to run the script:
  4. Turn on rosbridge on ROS computer to stream data from the drone-based compute unit to Unity: `roslaunch rosbridge_server rosbridge_websocket.launch`
  5. Hit the "play" button in Unity. Unity will attempt to connect to your drone computer via rosbridge. Check your rosbridge terminal on the drone computer for confirmation that the Unity client has subscribed to the correct rostopics.
  6. Make necessary modifications to isaacs_mapping.launch to suit your needs (running with live input from the camera vs. reading from rosbags; starting rosbridge via command line vs. starting it through the launch file; remapping the mesh topic for Unity). Comments are provided in the file for users to understand the use cases for each line.
- 7. Launch src\isaacs_mapping\launch\isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping_camera.launch`
+ 7. Launch src/isaacs_mapping/launch/isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping_camera.launch`
  8. Play a rosbag on the drone computer or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
  9. View meshes in Unity
 
