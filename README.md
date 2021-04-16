@@ -88,7 +88,7 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
 
 ### ROS-Bridge + Unity Test
-This test will make sure you're able to connect Unity to the on-board computer over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
+This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
 To be expanded...but in short:
  1. Get IP address of ROS computer
  2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
@@ -98,9 +98,34 @@ To be expanded...but in short:
  6. Play a ROSBag on ROS computer
  7. View meshes in Unity
 
+## Create meshes in the ArUco marker coordinate system
+Here are the relevant files:
+ 1. src/isaacs_mapping/launch/isaacs_mapping.launch
+ 2. src/isaacs_mapping/launch/zed_voxblox.launch
+ 3. src/isaacs_mapping/src/process_aruco.py
+
+The ZED 2 camera needs to publish the following topics:
+ 1. Point Cloud: /zed2/zed_node/mapping/fused_cloud
+ 2. Image: /zed2/zed_node/rgb/image_rect_color or /zed2/zed_node/rgb/image_rect_color/compressed
+
+Here is the general workflow for this process. The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses images from the camera to detect ArUco markers and converts point clouds to the marker coordinate system by modifyng the point cloud positions to be centered around the ArUco marker. It publishes the resulting modified point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
+
+This progarm can be run in two ways - one with live input from a ZED camera and another with prerecorded input from the ZED camera which is stored in the form of rosbags. In order to run one or the other, minor changes need to be made to the isaacs_mapping.launch file.
+
+Follow these steps to run the script:
+ 1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
+ 2. Enter the IP address into the drone and sensor settings under the world properties inspector window in Unity
+ 3. Configure sensors in the same inspector window to visualize data of type Mesh
+ 4. Turn on rosbridge on ROS computer to stream data from the drone-based compute unit to Unity: `roslaunch rosbridge_server rosbridge_websocket.launch`
+ 5. Hit the "play" button in Unity. Unity will attempt to connect to your drone computer via rosbridge. Check your rosbridge terminal on the drone computer for confirmation that the Unity client has subscribed to the correct rostopics.
+ 6. Make necessary modifications to isaacs_mapping.launch to suit your needs (running with live input from the camera vs. reading from rosbags; starting rosbridge via command line vs. starting it through the launch file; remapping the mesh topic for Unity). Comments are provided in the file for users to understand the use cases for each line.
+ 7. Launch src/isaacs_mapping/launch/isaacs_mapping.launch on ROS computer using: `roslaunch isaacs_mapping isaacs_mapping_camera.launch`
+ 8. Play a rosbag on the drone computer with `rosbag play <ros_bag_name>.bag` or use the ZED camera connected to the drone computer to capture images for real-time 3D reconstruction. 
+ 9. View meshes in Unity
+
 ## Help
 
-### Troubleshooting
+## Troubleshooting
 - Just try this again `source ~/ros_catkin_ws/devel/setup.bash`
 - Restart your computer
 - **Compilation failing? "Could not find a package..."** Looks like you're still missing a dependency! Google the name of it + "ros" and find how to install it. Also try searching for it in the [ROS Index](https://index.ros.org/). It may be a ROS package or a system dependency (choose accordingly during the search)
@@ -112,8 +137,5 @@ To be expanded...but in short:
 ### Tips & tricks
 - **Want to see info about *catkin build* beforehand?** Use `catkin build --dry-run`
 - **If you want to install new ros packages:** that don't have installation instructions, they would either be a git repo you need to clone, or the BETTER way is through an apt-get installation, like we installed **ros bridge** above. Sometimes you gotta guess the name so usually it follows this format `sudo apt-get install ros-<ROS_version>-<package_name>`. Google around!
-
-
-
 
 

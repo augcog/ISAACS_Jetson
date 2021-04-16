@@ -1,19 +1,20 @@
 <launch>
   
-  <!-- ROSBRIDGE -->
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  <!-- FOR REMAPPING THE VOXBLOX TOPIC. THIS ALLOWS MULTIPLE MESHES TO STREAM TO UNITY SIMULTAEOUSLY. -->
+  <!-- <remap from="/voxblox_node/mesh" to="/voxblox_node/mesh2"/> -->
   
-  <!-- VOXBLOX -->
+  <!-- FOR STARTING ROSBRIDGE. ALTERNATELY, THIS CAN BE DONE VIA TERMINAL. -->
+  <!-- include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" -->
+
+  
+  <!-- FOR VOXBLOX -->
   <include file="$(find isaacs_mapping)/launch/zed_voxblox.launch"/>
   
-  <!-- ZED 2 -->
-  <include file="$(find zed_wrapper)/launch/zed2.launch"/> 
+  <!-- FOR STARTING ZED 2 CAMERA. UNCOMMENT IF READING INPUT FROM CAMERA INSTEAD OF RECORDED ROSBAGS. -->
+  <!-- include file="$(find zed_wrapper)/launch/zed2.launch" -->  
   
-  <!-- ARUCO DETECTION -->
-  <include file="$(find my_aruco_tracker)/launch/aruco_marker_finder.launch"/> 
   
-  <!-- ARUCO POSE PROCESSING -->
-  <node name="aruco_pose" pkg="isaacs_mapping" type="process_aruco.py"/>
-
+  <!-- FOR ARUCO POSE PROCESSING -->
+  <node name="aruco_pose" pkg="isaacs_mapping" type="process_aruco.py" output="screen"/>
 
 </launch>
