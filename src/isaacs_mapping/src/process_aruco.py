@@ -43,7 +43,7 @@ class PointCloudCamToMarkerConverter:
 		self.converted_point_cloud_node = SETTINGS["converted_point_cloud_node"]
 		self.camera_pose = None
 		self.zed2marker = [[1, 0, 0, 0], # the zed2marker conversion matrix
-					        [0, 1, 0, 0], 
+					    [0, 1, 0, 0], 
 						[0, 0, 1, 0], 
 						[0, 0, 0, 1]]
 		
@@ -61,7 +61,7 @@ class PointCloudCamToMarkerConverter:
 		else:
 			self.image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color', Image, self.process_image)
 		self.pose_subsriber = rospy.Subscriber('/zed2/zed_node/pose', PoseStamped, self.update_camera_pose)
-		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size=10)
+		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size = 10)
 		rospy.spin()
 
 	""" Called when receiving an image message from ZED. Uses the image to detect the marker and set the pose."""
@@ -104,18 +104,21 @@ class PointCloudCamToMarkerConverter:
 	def convert_point_clouds(self, pointcloud_data):
 		reader = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z", "rgb"], skip_nans=True)
 		new_points = []
+		print("Start converting point clouds.")
 		for p in reader:
 			# transfer point to aruco marker's corrdinate system
 			new_p = list(np.matmul(self.zed2marker, [p[0], p[1], p[2], 1]))
 			new_p = list([new_p[0], new_p[1], new_p[2]]/new_p[3])
 			new_p.append(p[3])
 			new_points.append(new_p)
+		print("Converted point clouds message of size " , len(new_points))
 		return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
 
 	""" Get an image as input and trys to calculate the zed to marker transformation matrix"""
 	def try_set_pose(self,image):				
 		opencv_cam2marker = self.detect_marker(image)
-		
+		if(opencv_cam2marker is None):
+			return False
 		zed2cam = np.array([[0, -1, 0, 0], # zed camera coordinate system to opencv camera coordinate system transform
 							[0, 0, -1, 0],
 							[1, 0, 0, 0],
@@ -150,7 +153,7 @@ class PointCloudCamToMarkerConverter:
 		# lists of ids and the corners belonging to each id
 		corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary=aruco_dictionary, parameters = aruco_parameters)
 		if ids is None:
-			return False
+			return None
 		rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, self.marker_size, self.camera_intrinsic, self.camera_dist_coeffs)
 		rvec = rvec[0][0]
 		tvec = tvec[0][0]
