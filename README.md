@@ -88,7 +88,8 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
 
 ### ROS-Bridge + Unity Test
-This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity!
+This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity! The Unity interface with instructions to get it set up can be found [here](https://github.com/immersive-command-system/ImmersiveDroneInterface_2/tree/rfs-test). Our team is using the version on the rfs-test branch of the repo for our work with this script, so we suggest users do the same.
+
 To be expanded...but in short:
  1. Get IP address of ROS computer
  2. Enter IP addres into drone and sensors settings in world properties's inspector window in Unity
@@ -105,13 +106,13 @@ Here are the relevant files:
  3. src/isaacs_mapping/launch/zed2.launch (this needs to be copied into the zed_wrapper launch directory so we can record the correct data from the ZED camera)
  4. src/isaacs_mapping/src/process_aruco.py
 
-The ZED 2 camera needs to publish the following topics:
+The ZED 2 camera needs to publish the following topics: *to be updated* 
  1. Point Cloud: /zed2/zed_node/mapping/fused_cloud
  2. Image: /zed2/zed_node/rgb/image_rect_color or /zed2/zed_node/rgb/image_rect_color/compressed
 
 Here is the general workflow for this process. The script 'process_aruco.py' subscribes to the topics published by the ZED 2 camera. It uses images from the camera to detect ArUco markers and converts point clouds to the marker coordinate system by modifyng the point cloud positions to be centered around the ArUco marker. It publishes the resulting modified point clouds to a new topic. Voxblox has been set up to generate a mesh based on this new point cloud topic. By default, the script is receiving non-compressed images. If you want to use compressed images instead, at the end of 'process_aruco.py' use 'PointCloudCamToMarkerConverter(image_is_compressed = True)' to create the converter object.
 
-This progarm can be run in two ways - one with live input from a ZED camera and another with prerecorded input from the ZED camera which is stored in the form of rosbags. In order to run one or the other, minor changes need to be made to the isaacs_mapping.launch file.
+This program can be run in two ways - one with live input from a ZED camera and another with prerecorded input from the ZED camera which is stored in the form of rosbags. In order to run one or the other, minor changes need to be made to the isaacs_mapping.launch file.
 
 Follow these steps to run the script:
  1. Get the IP address of the ROS computer (can be done in a Linux terminal by running `hostname -I`)
