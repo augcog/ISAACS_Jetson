@@ -102,7 +102,8 @@ To be expanded...but in short:
 Here are the relevant files:
  1. src/isaacs_mapping/launch/isaacs_mapping.launch
  2. src/isaacs_mapping/launch/zed_voxblox.launch
- 3. src/isaacs_mapping/src/process_aruco.py
+ 3. src/isaacs_mapping/launch/zed2.launch (this needs to be copied into the zed_wrapper launch directory so we can record the correct data from the ZED camera)
+ 4. src/isaacs_mapping/src/process_aruco.py
 
 The ZED 2 camera needs to publish the following topics:
  1. Point Cloud: /zed2/zed_node/mapping/fused_cloud
