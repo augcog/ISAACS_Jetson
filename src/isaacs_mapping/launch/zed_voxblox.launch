@@ -3,12 +3,13 @@
   <arg name="voxel_size" default="0.1"/>
 
    <node name="voxblox_node" pkg="voxblox_ros" type="tsdf_server" output="screen" args="-alsologtostderr" clear_params="true">
-    <remap from="pointcloud" to="/converted_cloud"/>
+    <!-- <remap from="pointcloud" to="/converted_cloud"/> -->
+    <remap from="pointcloud" to="/zed2/zed_node/mapping/fused_cloud"/>
     <!--<remap from="pointcloud" to="/zed2/zed_node/point_cloud/cloud_registered"/>-->
 
     <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
     <!--<param name="world_frame" value="zed2_left_camera_frame" />-->
-    <param name="world_frame" value="map" />
+    <param name="world_frame" value="map" /> <!-- change to mesh -->
     <param name="tsdf_voxels_per_side" value="16" />
     <param name="voxel_carving_enabled" value="true" />
     <param name="color_mode" value="color" />
@@ -17,7 +18,7 @@
     <param name="min_time_between_msgs_sec" value="0.0" />
     <param name="method" value="fast" />
     <!--<param name="max_integration_time_s" value="0.1" />-->
-    <!--<param name="pointcloud_queue_size" value="200000" />-->
+    <param name="pointcloud_queue_size" value="20000000" />
     <param name="use_const_weight" value="false" />
     <param name="allow_clear" value="true" />
     <param name="verbose" value="true" />
