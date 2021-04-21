@@ -62,6 +62,9 @@ Create a catkin workspace as follows. If you've made one before on your personal
 ### Installing other ROS Packages
 - ROS Bridge, for sending data to other computers on the network, namely VR interface (or ISAACS server in the future). `sudo apt-get install ros-melodic-rosbridge-server`
 
+### Setting Up the Unity Interface
+The Unity interface with instructions to get it set up can be found [here](https://github.com/immersive-command-system/ImmersiveDroneInterface_2/tree/rfs-test). Our team is using the version on the rfs-test branch of the repo for our work with this script, so we suggest users do the same.
+
 ## Tests
 
 ### Voxblox (and ROS) Test
@@ -88,7 +91,7 @@ Now, to make sure Voxblox is working, we will follow the Voxblox running instruc
 5) If T2 is still printing out stuff, then you should see voxblox meshes get visualized! If no meshes are showing, re-launch the command in T2.
 
 ### ROS-Bridge + Unity Test
-This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity! The Unity interface with instructions to get it set up can be found [here](https://github.com/immersive-command-system/ImmersiveDroneInterface_2/tree/rfs-test). Our team is using the version on the rfs-test branch of the repo for our work with this script, so we suggest users do the same.
+This test will make sure you're able to connect Unity to the on-board computer (We will call it ROS computer) over a ROS Bridge Server connection. If successful, you'll be able to see the dataset you've visualized in rviz show up in Unity! 
 
 To be expanded...but in short:
  1. Get IP address of ROS computer
