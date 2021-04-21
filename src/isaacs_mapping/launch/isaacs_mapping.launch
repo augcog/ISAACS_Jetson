@@ -11,7 +11,7 @@
   <include file="$(find isaacs_mapping)/launch/zed_voxblox.launch"/>
   
   <!-- FOR STARTING ZED 2 CAMERA. UNCOMMENT IF READING INPUT FROM CAMERA INSTEAD OF RECORDED ROSBAGS. -->
-  <!-- include file="$(find zed_wrapper)/launch/zed2.launch" -->  
+  <include file="$(find zed_wrapper)/launch/zed2.launch"/>  
   
   
   <!-- FOR ARUCO POSE PROCESSING -->
