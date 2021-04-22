@@ -5,6 +5,8 @@ from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
 from sensor_msgs import point_cloud2
+from voxblox_msgs.msg import Mesh
+from voxblox_msgs.msg import MeshBlock
 import csv
 import math
 from zed_interfaces.srv import *
@@ -24,7 +26,8 @@ SETTINGS = {
 					   [0, 1, 0, 0],
 					   [0, 0, 1, 0],
 					   [0, 0, 0, 1]],
-	"converted_point_cloud_node" : "converted_cloud" # name of the node we publish our converted point clouds to
+	"converted_point_cloud_node" : "converted_cloud", # name of the node we publish our converted point clouds to
+	"converted_mesh_node" : "converted_mesh"
 }
 
 class PointCloudCamToMarkerConverter:
@@ -41,6 +44,9 @@ class PointCloudCamToMarkerConverter:
 		self.pointcloud_subsriber = None
 		self.pointcloud_publisher = None
 		self.converted_point_cloud_node = SETTINGS["converted_point_cloud_node"]
+		self.mesh_subsriber = None
+		self.mesh_publisher = None
+		self.converted_mesh_node = SETTINGS["converted_mesh_node"]
 		self.camera_pose = None
 		self.zed2marker = [[1, 0, 0, 0], # the zed2marker conversion matrix
 					    [0, 1, 0, 0], 
@@ -61,7 +67,8 @@ class PointCloudCamToMarkerConverter:
 		else:
 			self.image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color', Image, self.process_image)
 		self.pose_subsriber = rospy.Subscriber('/zed2/zed_node/pose', PoseStamped, self.update_camera_pose)
-		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size = 10)
+		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size = 20)
+		self.mesh_publisher = rospy.Publisher(self.converted_mesh_node, Mesh, queue_size = 20)
 		rospy.spin()
 
 	""" Called when receiving an image message from ZED. Uses the image to detect the marker and set the pose."""
@@ -82,7 +89,9 @@ class PointCloudCamToMarkerConverter:
 			self.image_subsriber.unregister()
 			if not self.print_camera_pos:
 				self.pose_subsriber.unregister()
-			self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, self.convert_zed_pose)
+			#self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, self.convert_zed_pose)
+			self.mesh_subsriber = rospy.Subscriber('/voxblox_node/mesh', Mesh, self.convert_voxblox_mesh, queue_size = 20)
+			#self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/point_cloud/cloud_registered', PointCloud2, self.convert_zed_pose, queue_size = 20)
 
 	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
@@ -107,12 +116,49 @@ class PointCloudCamToMarkerConverter:
 		print("Start converting point clouds.")
 		for p in reader:
 			# transfer point to aruco marker's corrdinate system
-			new_p = list(np.matmul(self.zed2marker, [p[0], p[1], p[2], 1]))
-			new_p = list([new_p[0], new_p[1], new_p[2]]/new_p[3])
-			new_p.append(p[3])
+			new_p = self.convert_point_to_marker(p[0], p[1], p[2])
+			new_p.append(p[3]) #add rgb value to the point
 			new_points.append(new_p)
 		print("Converted point clouds message of size " , len(new_points))
 		return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
+
+	def convert_voxblox_mesh(self, meshdata):
+		if(len(meshdata.mesh_blocks) <= 0):
+			return 
+		num = 0
+		print("Converting voxblox mesh to marker coordinate system.")
+		for block in meshdata.mesh_blocks:
+			num += len(block.x)
+			block.x = list(block.x)
+			block.y = list(block.y)
+			block.z = list(block.z)
+			for i in range(len(block.x)):
+				converted_p = self.voxblox_pos_to_float_pos(block.x[i], block.y[i], block.z[i], block.index, meshdata.block_edge_length)
+				converted_p = self.convert_point_to_marker(converted_p[0], converted_p[1], converted_p[2])
+				converted_p = self.float_pos_to_voxblox_pos(converted_p[0], converted_p[1], converted_p[2], block.index, meshdata.block_edge_length)
+				block.x[i] = converted_p[0]
+				block.y[i] = converted_p[1]
+				block.z[i] = converted_p[2]
+		self.mesh_publisher.publish(meshdata)
+		print("Finished converting mesh with vertices size:", num)
+		
+
+	def voxblox_pos_to_float_pos(self, x, y, z, index, block_edge_length):
+		new_x = ((float)(x / 32768.0) + index[0]) * block_edge_length
+		new_y = ((float)(y / 32768.0) + index[1]) * block_edge_length
+		new_z = ((float)(z / 32768.0) + index[2]) * block_edge_length
+		return [new_x, new_y, new_z]
+
+	def float_pos_to_voxblox_pos(self, x, y, z, index, block_edge_length):
+		new_x = np.uint16((x/block_edge_length - index[0]) * 32768)
+		new_y = np.uint16((y/block_edge_length - index[1]) * 32768)
+		new_z = np.uint16((z/block_edge_length - index[2]) * 32768)
+		return [new_x, new_y, new_z]
+
+	def convert_point_to_marker(self, x, y, z):
+		converted_p = list(np.matmul(self.zed2marker, [x, y, z, 1]))
+		converted_p = list([converted_p[0], converted_p[1], converted_p[2]]/converted_p[3])
+		return converted_p
 
 	""" Get an image as input and trys to calculate the zed to marker transformation matrix"""
 	def try_set_pose(self,image):				
@@ -199,5 +245,5 @@ class PointCloudCamToMarkerConverter:
 
 if __name__ == '__main__':
 	print('Node to write tracked data started .......')
-	converter = PointCloudCamToMarkerConverter()
+	converter = PointCloudCamToMarkerConverter(image_is_compressed = True)
 	converter.start()
