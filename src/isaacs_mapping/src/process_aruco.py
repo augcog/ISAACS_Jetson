@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped
-from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
-from sensor_msgs import point_cloud2
-from voxblox_msgs.msg import Mesh
-from voxblox_msgs.msg import MeshBlock
+#from sensor_msgs.msg import PointCloud2
+#from sensor_msgs import point_cloud2
+#from voxblox_msgs.msg import Mesh
+#from voxblox_msgs.msg import MeshBlock
+from std_msgs.msg import Float32MultiArray
 import csv
 import math
 from zed_interfaces.srv import *
@@ -27,7 +28,8 @@ SETTINGS = {
 					   [0, 0, 1, 0],
 					   [0, 0, 0, 1]],
 	"converted_point_cloud_node" : "converted_cloud", # name of the node we publish our converted point clouds to
-	"converted_mesh_node" : "converted_mesh"
+	"converted_mesh_node" : "converted_mesh",
+	"conversion_matrix_node" : "zed2marker_matrix"
 }
 
 class PointCloudCamToMarkerConverter:
@@ -43,10 +45,11 @@ class PointCloudCamToMarkerConverter:
 		self.pose_subsriber = None
 		self.pointcloud_subsriber = None
 		self.pointcloud_publisher = None
-		self.converted_point_cloud_node = SETTINGS["converted_point_cloud_node"]
 		self.mesh_subsriber = None
 		self.mesh_publisher = None
+		self.converted_point_cloud_node = SETTINGS["converted_point_cloud_node"]
 		self.converted_mesh_node = SETTINGS["converted_mesh_node"]
+		self.conversion_matrix_node = SETTINGS["conversion_matrix_node"]
 		self.camera_pose = None
 		self.zed2marker = [[1, 0, 0, 0], # the zed2marker conversion matrix
 					    [0, 1, 0, 0], 
@@ -67,8 +70,9 @@ class PointCloudCamToMarkerConverter:
 		else:
 			self.image_subsriber = rospy.Subscriber('/zed2/zed_node/rgb/image_rect_color', Image, self.process_image)
 		self.pose_subsriber = rospy.Subscriber('/zed2/zed_node/pose', PoseStamped, self.update_camera_pose)
-		self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size = 20)
-		self.mesh_publisher = rospy.Publisher(self.converted_mesh_node, Mesh, queue_size = 20)
+		#self.pointcloud_publisher = rospy.Publisher(self.converted_point_cloud_node, PointCloud2, queue_size = 20)
+		#self.mesh_publisher = rospy.Publisher(self.converted_mesh_node, Mesh, queue_size = 20)
+		self.conversion_matrix_publisher = rospy.Publisher(self.conversion_matrix_node, Float32MultiArray, queue_size = 10)
 		rospy.spin()
 
 	""" Called when receiving an image message from ZED. Uses the image to detect the marker and set the pose."""
@@ -90,8 +94,15 @@ class PointCloudCamToMarkerConverter:
 			if not self.print_camera_pos:
 				self.pose_subsriber.unregister()
 			#self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/mapping/fused_cloud', PointCloud2, self.convert_zed_pose)
-			self.mesh_subsriber = rospy.Subscriber('/voxblox_node/mesh', Mesh, self.convert_voxblox_mesh, queue_size = 20)
+			#self.mesh_subsriber = rospy.Subscriber('/voxblox_node/mesh', Mesh, self.convert_voxblox_mesh, queue_size = 20)
 			#self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/point_cloud/cloud_registered', PointCloud2, self.convert_zed_pose, queue_size = 20)
+
+			#publish the matrix
+			conversion_matrix_data = Float32MultiArray()  # the data to be sent, initialise the array
+			conversion_matrix_data.data = []
+			for a in self.zed2marker:
+				conversion_matrix_data.data += list(a) # assign the array with the value you want to send
+			self.conversion_matrix_publisher.publish(conversion_matrix_data)
 
 	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
@@ -109,6 +120,7 @@ class PointCloudCamToMarkerConverter:
 		pointcloud_data = self.convert_point_clouds(pointcloud_data)
 		self.pointcloud_publisher.publish(pointcloud_data) 
 
+	'''
 	""" Helper function that loops through all the point clouds and converts their position to the marker coordinate system. """
 	def convert_point_clouds(self, pointcloud_data):
 		reader = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z", "rgb"], skip_nans=True)
@@ -136,9 +148,9 @@ class PointCloudCamToMarkerConverter:
 				converted_p = self.voxblox_pos_to_float_pos(block.x[i], block.y[i], block.z[i], block.index, meshdata.block_edge_length)
 				converted_p = self.convert_point_to_marker(converted_p[0], converted_p[1], converted_p[2])
 				converted_p = self.float_pos_to_voxblox_pos(converted_p[0], converted_p[1], converted_p[2], block.index, meshdata.block_edge_length)
-				block.x[i] = converted_p[0]
-				block.y[i] = converted_p[1]
-				block.z[i] = converted_p[2]
+				#block.x[i] = converted_p[0]
+				#block.y[i] = converted_p[1]
+				#block.z[i] = converted_p[2]
 		self.mesh_publisher.publish(meshdata)
 		print("Finished converting mesh with vertices size:", num)
 		
@@ -159,7 +171,8 @@ class PointCloudCamToMarkerConverter:
 		converted_p = list(np.matmul(self.zed2marker, [x, y, z, 1]))
 		converted_p = list([converted_p[0], converted_p[1], converted_p[2]]/converted_p[3])
 		return converted_p
-
+	'''
+	
 	""" Get an image as input and trys to calculate the zed to marker transformation matrix"""
 	def try_set_pose(self,image):				
 		opencv_cam2marker = self.detect_marker(image)
@@ -169,7 +182,7 @@ class PointCloudCamToMarkerConverter:
 							[0, 0, -1, 0],
 							[1, 0, 0, 0],
 							[0, 0, 0, 1]])	
-		if self.calibrate_initial_pos:
+		'''if self.calibrate_initial_pos:
 			if self.camera_pose is None:
 				return False
 			# when we detect marker, the ZED camera may not be at the origin of the ZED camera coordinate system (its initial position when the camera is started)
@@ -186,7 +199,8 @@ class PointCloudCamToMarkerConverter:
 			camera_R = np.matmul(camera_R, self.camera_extrinsic)
 			self.zed2marker = np.matmul(np.matmul(opencv_cam2marker, zed2cam), camera_R)
 		else:
-			self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)
+			self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)'''
+		self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)
 		return True
 
 	""" Detect the marker in the image and return the opencv camera to marker transformation matrix."""
