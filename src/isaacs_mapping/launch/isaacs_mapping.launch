@@ -1,19 +1,20 @@
 <launch>
   
   <!-- ROSBRIDGE -->
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-  
+  <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+  -->
   <!-- VOXBLOX -->
   <include file="$(find isaacs_mapping)/launch/zed_voxblox.launch"/>
   
   <!-- ZED 2 -->
-  <include file="$(find zed_wrapper)/launch/zed2.launch"/> 
+  <include file="$(find isaacs_mapping)/launch/zed2.launch"/> 
   
   <!-- ARUCO DETECTION -->
-  <include file="$(find my_aruco_tracker)/launch/aruco_marker_finder.launch"/> 
-  
+  <!--  <include file="$(find my_aruco_tracker)/launch/aruco_marker_finder.launch"/>
+   -->
+
   <!-- ARUCO POSE PROCESSING -->
-  <node name="aruco_pose" pkg="isaacs_mapping" type="process_aruco.py"/>
+  <!-- <node name="aruco_pose" pkg="isaacs_mapping" type="process_aruco.py" output="screen"/> -->
 
 
 </launch>
