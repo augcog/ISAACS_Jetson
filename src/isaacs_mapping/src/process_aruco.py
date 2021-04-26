@@ -98,11 +98,17 @@ class PointCloudCamToMarkerConverter:
 			#self.pointcloud_subsriber = rospy.Subscriber('/zed2/zed_node/point_cloud/cloud_registered', PointCloud2, self.convert_zed_pose, queue_size = 20)
 
 			#publish the matrix
-			conversion_matrix_data = Float32MultiArray()  # the data to be sent, initialise the array
-			conversion_matrix_data.data = []
-			for a in self.zed2marker:
-				conversion_matrix_data.data += list(a) # assign the array with the value you want to send
-			self.conversion_matrix_publisher.publish(conversion_matrix_data)
+			self.publish_conversion_matrix()
+
+	def publish_conversion_matrix(self):
+		'''
+		conversion_matrix_data = Float32MultiArray()  # the data to be sent, initialise the array
+		conversion_matrix_data.data = []
+		for a in self.zed2marker:
+			conversion_matrix_data.data += list(a) # assign the array with the value you want to send
+		'''
+		
+		self.conversion_matrix_publisher.publish(conversion_matrix_data)
 
 	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
