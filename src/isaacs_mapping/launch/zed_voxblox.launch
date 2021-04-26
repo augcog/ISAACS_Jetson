@@ -20,6 +20,7 @@
 
     <!--<param name="world_frame" value="zed2_left_camera_frame-->
 
+
     <param name="tsdf_voxels_per_side" value="16" />
 
     <param name="voxel_carving_enabled" value="true" />
@@ -37,6 +38,7 @@
     <!--<param name="max_integration_time_s" value="0.1" />-->
 
     <!--<param name="pointcloud_queue_size" value="200000" />-->
+
 
     <param name="use_const_weight" value="false" />
 
