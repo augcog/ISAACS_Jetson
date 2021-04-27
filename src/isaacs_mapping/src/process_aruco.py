@@ -8,12 +8,13 @@ from sensor_msgs.msg import Image
 #from voxblox_msgs.msg import Mesh
 #from voxblox_msgs.msg import MeshBlock
 from std_msgs.msg import Float32MultiArray
-from geometry_msgs.msgs import Transform
+from geometry_msgs.msg import Transform
 import csv
 import math
 from zed_interfaces.srv import *
 import cv2
 import numpy as np
+from math import sqrt
 import tf
 
 
@@ -112,7 +113,7 @@ class PointCloudCamToMarkerConverter:
 			conversion_matrix_data.data += list(a) # assign the array with the value you want to send
 		'''
 
-		translations, rotations = transform_from_matrix(self.zed2marker)
+		translations, rotations = self.transform_from_matrix(self.zed2marker)
 		tf_msg = Transform()
 
 
