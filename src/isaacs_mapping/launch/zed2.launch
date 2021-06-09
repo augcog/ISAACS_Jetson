@@ -53,6 +53,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </include>
 </group>
 
+	<!-- /zed2/zed_node/point_cloud/cloud_registered -->
+
     <arg name="rosbag_topics" value=
 	    "/tf
 	    /tf_static
@@ -60,9 +62,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    /zed2/zed_node/pose_with_covariance
 	    /zed2/zed_node/rgb/camera_info
 	    /zed2/zed_node/depth/camera_info
-	    /zed2/zed_node/point_cloud/cloud_registered
+	    
 	    /zed2/zed_node/rgb/image_rect_color/compressed
-	    /voxblox_node/mesh" />
+	    /voxblox_node/mesh 
+	    /zed2marker_transform"/>
 
     <node pkg="rosbag" type="record" name="rosbag_record" args="--split --size=2048 -b 3048 --lz4 -o /home/isaacs/Data/zed_bags/zed_bags $(arg rosbag_topics)" />
 

@@ -2,7 +2,7 @@
 
 
 
-  <arg name="voxel_size" default="0.1"/>
+  <arg name="voxel_size" default="0.03"/>
 
 
 
@@ -29,7 +29,7 @@
 
     <param name="use_tf_transforms" value="true" />
 
-    <param name="update_mesh_every_n_sec" value="0.5" />
+    <param name="update_mesh_every_n_sec" value="0.7" />
 
     <param name="min_time_between_msgs_sec" value="0.0" />
 
@@ -44,13 +44,14 @@
 
     <param name="allow_clear" value="true" />
 
-    <param name="verbose" value="true" />
+    <param name="verbose" value="false" />
 
     <remap from="transform" to="/zed2/zed_node/pose" />
 
    <!-- <rosparam file="$(find voxblox_ros)/cfg/cow_and_lady.yaml"/>
 -->
     <param name="mesh_filename" value="$(find voxblox_ros)/mesh_results/$(anon cow).ply" />
+    <param name="output_mesh_as_pcl_mesh" value="true" />
 
   </node>
 
