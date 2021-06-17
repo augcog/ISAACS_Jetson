@@ -51,7 +51,7 @@ Create a catkin workspace as follows. If you've made one before on your personal
 - `git clone https://github.com/immersive-command-system/drone-jetson.git`
 - `cd drone-jetson`
 - `git submodule update --init --recursive` Clones all the submodules, which are git repos within this git repo. Each submodule is a ROS package.
-- `sudo apt-get install ros-melodic-nmea-msgs` Required by DJI's Onboard-SDK-ROS package. For other problems, see the **troubleshooting** section below.
+- For problems, see the **troubleshooting** section below.
 - Good job!
 - The next step is to compile, but do note it takes up quite a bit of RAM. Use: `catkin build --mem-limit 60%` or any other limit that fits you. Otherwise, please watch the RAM usage as you compile so your computer doesn't freeze on you. To limit the RAM usage during compilation, you have two options. The smooth-brain way is to kill `ctrl+c` the compilation process whenever the RAM usage is increasing past 90-95% of your total RAM. Then, **re-run** the compilation process (using the same command). It will pick up where it left off, quickly checking off the stuff it has aleady compiled, and resuming! In addition, you can also limit your RAM usage by closing all other programs, or if using a VM, increase its RAM allowance -- 3-4GB of RAM has worked for some people. I followed the smooth-brain way to stay below my 8gb of RAM. So that's one way to do this. The other way, the wrinkly-brain way, of limiting RAM usage is learning to use these [commands/flags](https://github.com/catkin/catkin_tools/issues/167). I think `catkin build --mem-limit 60%` would do the trick.
 - `cd ..` Before compiling, you should be back in the directory *ros_catkin_ws*
