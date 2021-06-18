@@ -8,9 +8,6 @@ project(isaacs_mapping)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  aruco_ros
-  my_aruco_tracker
-  my_aruco_tracker
   roscpp
   rospy
   sensor_msgs
