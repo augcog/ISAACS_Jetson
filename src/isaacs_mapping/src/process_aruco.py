@@ -21,9 +21,12 @@ import tf
 
 SETTINGS = {
 #	"marker_size" : 0.08, # length of one side of the marker, in meters
-        "marker_size" : 0.105,
+       "marker_size" : 0.105,        
+#        "marker_size" : 0.160,
 #	"aruco_dict" : cv2.aruco.DICT_ARUCO_ORIGINAL, # which dictionary the marker is in  
 	"aruco_dict" : cv2.aruco.DICT_5X5_250, # which dictionary the marker is in 
+
+        # For 720p mode
         "camera_intrinsic" : np.matrix([[519.5537109375, 0.0, 656.6468505859375], 
 							[0.0, 519.5537109375, 363.6219482421875], 
 							[0.0, 0.0, 1.0]]),
@@ -267,9 +270,9 @@ class PointCloudCamToMarkerConverter:
                 rot_vec_zed2marker = R.from_dcm(opencv_cam2marker[:3, :3]).as_rotvec()
                 rot_vec_zed2marker = R.from_rotvec(np.matmul(rot_vec_zed2marker, zed2cam))
                 trans_vec_zed2marker = opencv_cam2marker[:3, 3]
-                print("Trans vec zed2marker:", trans_vec_zed2marker)
-                trans_vec_zed2marker = np.matmul(trans_vec_zed2marker, zed2cam)
-                print("Trans vec zed2marker:", trans_vec_zed2marker)
+                #print("Trans vec zed2marker:", trans_vec_zed2marker)
+                #trans_vec_zed2marker = np.matmul(trans_vec_zed2marker, zed2cam)
+                #print("Trans vec zed2marker:", trans_vec_zed2marker)
                 
                 # populate augmented rotation matrix with new values
                 opencv_cam2marker[:3, :3] = rot_vec_zed2marker.as_dcm()

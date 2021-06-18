@@ -63,9 +63,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	    /zed2/zed_node/rgb/camera_info
 	    /zed2/zed_node/depth/camera_info
 	    
-	    /zed2/zed_node/rgb/image_rect_color/compressed
+	    /zed2/zed_node/rgb/image_rect_color
 	    /voxblox_node/mesh 
-	    /zed2marker_transform"/>
+	    /zed2marker_transform"/> <!-- removed compressed. FPS is low so should be fine -->
 
     <node pkg="rosbag" type="record" name="rosbag_record" args="--split --size=2048 -b 3048 --lz4 -o /home/isaacs/Data/zed_bags/zed_bags $(arg rosbag_topics)" />
 

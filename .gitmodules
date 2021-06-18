@@ -57,6 +57,7 @@
 [submodule "Onboard-SDK-ROS"]
 	path = src/Onboard-SDK-ROS
 	url = https://github.com/dji-sdk/Onboard-SDK-ROS.git
+	branch = 3.8.1
 
 [submodule "nmea_msgs"]
 	path = src/nmea_msgs
