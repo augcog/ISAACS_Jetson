@@ -45,7 +45,7 @@ Create a catkin workspace as follows. If you've made one before on your personal
 - `cd ~/ros_catkin_ws`
 - `catkin init` Creates a catkin workspace (by creating a hidden directory *.catkin_tools*)
 - `catkin config --extend /opt/ros/melodic`
-- We'll set the compilation flag to be in **Release** mode. If you want to compile faster, but have unoptimized code, type Debug instead of Release. Debug will compile faster with few/no compiler optimizations (your code will run slow). Run: `catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release` 
+- We'll set the compilation flag to be in **Release** mode. If you want to compile faster, but have unoptimized code, type Debug instead of Release. Debug will compile faster with few/no compiler optimizations (your code will run slow) and some programs will constantly output Debug messages as they run. Run: `catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release` 
 - `catkin config --merge-devel`
 - `cd src`
 - `git clone https://github.com/immersive-command-system/drone-jetson.git`
