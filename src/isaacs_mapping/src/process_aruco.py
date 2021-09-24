@@ -4,12 +4,7 @@ from scipy.spatial.transform import Rotation as R
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
-#from sensor_msgs.msg import PointCloud2
-#from sensor_msgs import point_cloud2
-#from voxblox_msgs.msg import Mesh
-#from voxblox_msgs.msg import MeshBlock
-from std_msgs.msg import Float32MultiArray
-from geometry_msgs.msg import Transform
+from isaacs_mapping.msg import Matrix4x4
 import csv
 import math
 from zed_interfaces.srv import *
@@ -85,7 +80,7 @@ class PointCloudCamToMarkerConverter:
 		#self.mesh_publisher = rospy.Publisher(self.converted_mesh_node, Mesh, queue_size = 20)
 
 
-		self.transform_matrix_publisher = rospy.Publisher(self.conversion_matrix_node, Transform, queue_size = 10)
+		self.transform_matrix_publisher = rospy.Publisher(self.conversion_matrix_node, Matrix4x4, queue_size = 10)
 
 		rospy.spin()
 
@@ -122,6 +117,7 @@ class PointCloudCamToMarkerConverter:
 			conversion_matrix_data.data += list(a) # assign the array with the value you want to send
 		'''
 
+		'''
 		#translations, rotations = self.transform_from_matrix(self.zed2marker) # incorrect conversion!
                 r = R.from_dcm(self.zed2marker[:3, :3])
                 q = r.as_quat() # x y z w
@@ -159,7 +155,14 @@ class PointCloudCamToMarkerConverter:
 
                 deg_r, deg_p, deg_y = r.as_euler('xyz', degrees=True)
                 print("R:", deg_r, "P:", deg_p, "Y:", deg_y)
-               
+		'''
+		tf_msg = Matrix4x4()
+		tf_msg.row1 = self.zed2marker[0]
+		tf_msg.row2 = self.zed2marker[1]
+		tf_msg.row3 = self.zed2marker[2]
+		tf_msg.row4 = self.zed2marker[3]
+		self.transform_matrix_publisher.publish(tf_msg)
+		print("transform published")
 
 	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
