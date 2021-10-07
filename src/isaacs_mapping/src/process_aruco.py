@@ -265,6 +265,7 @@ class PointCloudCamToMarkerConverter:
 		print("Rvec", rvec)
                 print("Tvec", tvec)
                 rvec = rvec[0][0]
+                rvec[0] = rvec[2] = 0
                 print("rvec[00]", rvec)
                 #rvec[0] -= 3.141592
                # rvec[0] = rvec[0] % 3.14592
