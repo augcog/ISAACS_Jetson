@@ -4,12 +4,7 @@ from scipy.spatial.transform import Rotation as R
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import CompressedImage
 from sensor_msgs.msg import Image
-#from sensor_msgs.msg import PointCloud2
-#from sensor_msgs import point_cloud2
-#from voxblox_msgs.msg import Mesh
-#from voxblox_msgs.msg import MeshBlock
-from std_msgs.msg import Float32MultiArray
-from geometry_msgs.msg import Transform
+from isaacs_mapping.msg import Matrix4x4
 import csv
 import math
 from zed_interfaces.srv import *
@@ -85,7 +80,7 @@ class PointCloudCamToMarkerConverter:
 		#self.mesh_publisher = rospy.Publisher(self.converted_mesh_node, Mesh, queue_size = 20)
 
 
-		self.transform_matrix_publisher = rospy.Publisher(self.conversion_matrix_node, Transform, queue_size = 10)
+		self.transform_matrix_publisher = rospy.Publisher(self.conversion_matrix_node, Matrix4x4, queue_size = 10)
 
 		rospy.spin()
 
@@ -122,6 +117,7 @@ class PointCloudCamToMarkerConverter:
 			conversion_matrix_data.data += list(a) # assign the array with the value you want to send
 		'''
 
+		'''
 		#translations, rotations = self.transform_from_matrix(self.zed2marker) # incorrect conversion!
                 r = R.from_dcm(self.zed2marker[:3, :3])
                 q = r.as_quat() # x y z w
@@ -159,7 +155,14 @@ class PointCloudCamToMarkerConverter:
 
                 deg_r, deg_p, deg_y = r.as_euler('xyz', degrees=True)
                 print("R:", deg_r, "P:", deg_p, "Y:", deg_y)
-               
+		'''
+		tf_msg = Matrix4x4()
+		tf_msg.row1 = self.zed2marker[0]
+		tf_msg.row2 = self.zed2marker[1]
+		tf_msg.row3 = self.zed2marker[2]
+		tf_msg.row4 = self.zed2marker[3]
+		self.transform_matrix_publisher.publish(tf_msg)
+		print("transform published")
 
 	"""Called when receiving a pose message from Zed. Store the pose to keep self.camera_pose update to date."""
 	def update_camera_pose(self, data):
@@ -235,51 +238,14 @@ class PointCloudCamToMarkerConverter:
 		opencv_cam2marker = self.detect_marker(image)
 		if(opencv_cam2marker is None):
 			return False
-		#zed2cam = np.array([[0, -1, 0, 0], # zed camera coordinate system to opencv camera coordinate system transform
-		#					[0, 0, -1, 0],
-		#					[1, 0, 0, 0],
-		#					[0, 0, 0, 1]])	
-		# to delete
-                
-                
-		zed2cam = np.array([[1, 0, 0], # OpenCV XYZ to Unity X, Z, -Y 
-		                    [0, 0, 1],		    
-                                    [0, -1,0]])
-                '''if self.calibrate_initial_pos:
-			if self.camera_pose is None:
-				return False
-			# when we detect marker, the ZED camera may not be at the origin of the ZED camera coordinate system (its initial position when the camera is started)
-			# we need to take camera's pose into account
-			camera_R = np.array([[0, 0, 0, self.camera_pose.position.x],
-					[0, 0, 0, self.camera_pose.position.y],
-					[0, 0, 0, self.camera_pose.position.z],
-					[0, 0, 0, 1]],
-									dtype=float)
-			camera_rvec = PointCloudCamToMarkerConverter.euler_from_quaternion(self.camera_pose.orientation.x, self.camera_pose.orientation.y, 
-												self.camera_pose.orientation.z, self.camera_pose.orientation.w)
-			camera_R[:3, :3], _ = cv2.Rodrigues(camera_rvec)
-			camera_R = np.linalg.inv(camera_R)
-			camera_R = np.matmul(camera_R, self.camera_extrinsic)
-			self.zed2marker = np.matmul(np.matmul(opencv_cam2marker, zed2cam), camera_R)
-		else:
-			self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)'''
-		print("rotation matrix (cam in marker coords)")
-                print(self.zed2marker)
+                                
 
-                # convert rotation matrix to rotation vector, then apply coordinate system change
-                rot_vec_zed2marker = R.from_dcm(opencv_cam2marker[:3, :3]).as_rotvec()
-                rot_vec_zed2marker = R.from_rotvec(np.matmul(rot_vec_zed2marker, zed2cam))
-                trans_vec_zed2marker = opencv_cam2marker[:3, 3]
-                #print("Trans vec zed2marker:", trans_vec_zed2marker)
-                #trans_vec_zed2marker = np.matmul(trans_vec_zed2marker, zed2cam)
-                #print("Trans vec zed2marker:", trans_vec_zed2marker)
-                
-                # populate augmented rotation matrix with new values
-                opencv_cam2marker[:3, :3] = rot_vec_zed2marker.as_dcm()
-                opencv_cam2marker[:3, 3] = trans_vec_zed2marker
-                # NEED to still apply zed2cam to translation vector!
-                self.zed2marker = opencv_cam2marker
-                #self.zed2marker = np.matmul(opencv_cam2marker, zed2cam) # nitzan
+                zed2cam = np.array([[0, -1, 0, 0], # zed camera coordinate system to opencv camera coordinate system transform
+							[0, 0, -1, 0],
+							[1, 0, 0, 0],
+							[0, 0, 0, 1]])	
+
+		self.zed2marker = np.matmul(opencv_cam2marker, zed2cam)
                 print("rotation matrix (unity coords)")
                 print(self.zed2marker)
 		return True
@@ -299,6 +265,7 @@ class PointCloudCamToMarkerConverter:
 		print("Rvec", rvec)
                 print("Tvec", tvec)
                 rvec = rvec[0][0]
+                rvec[0] = rvec[2] = 0
                 print("rvec[00]", rvec)
                 #rvec[0] -= 3.141592
                # rvec[0] = rvec[0] % 3.14592
