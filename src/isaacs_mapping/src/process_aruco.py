@@ -15,19 +15,13 @@ import tf
 
 
 SETTINGS = {
-#	"marker_size" : 0.08, # length of one side of the marker, in meters
-       "marker_size" : 0.105,        
-#        "marker_size" : 0.160,
-#	"aruco_dict" : cv2.aruco.DICT_ARUCO_ORIGINAL, # which dictionary the marker is in  
+       "marker_size" : 0.105,     # length of one side of the marker, in meters    
 	"aruco_dict" : cv2.aruco.DICT_5X5_250, # which dictionary the marker is in 
 
         # For 720p mode
         "camera_intrinsic" : np.matrix([[519.5537109375, 0.0, 656.6468505859375], 
 							[0.0, 519.5537109375, 363.6219482421875], 
 							[0.0, 0.0, 1.0]]),
-        #"camera_intrinsic_rectified" : np.matrix([[1.0, 0.0, 0.0],
-                                                        #[0.0, 1.0, 0.0],
-                                                        #[0.0, 0.0, 1.0]]), # delete this
 	"camera_dist_coeffs" : np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
 	"camera_extrinsic" : [[1, 0, 0, 0.06],
 					   [0, 1, 0, 0],
@@ -110,52 +104,6 @@ class PointCloudCamToMarkerConverter:
 			self.publish_zed_transform()
 
 	def publish_zed_transform(self):
-		'''
-		conversion_matrix_data = Float32MultiArray()  # the data to be sent, initialise the array
-		conversion_matrix_data.data = []
-		for a in self.zed2marker:
-			conversion_matrix_data.data += list(a) # assign the array with the value you want to send
-		'''
-
-		'''
-		#translations, rotations = self.transform_from_matrix(self.zed2marker) # incorrect conversion!
-                r = R.from_dcm(self.zed2marker[:3, :3])
-                q = r.as_quat() # x y z w
-                print(q)
-                tf_msg = Transform()
-
-
-		#tf_msg.translation.x = translations[0]
-		#tf_msg.translation.y = translations[1]
-		#tf_msg.translation.z = translations[2]
-
-                # translation vector is simply the last column of the 4x4 augmented rotation matrix
-		tf_msg.translation.x = self.zed2marker[0][3]
-		tf_msg.translation.y = self.zed2marker[1][3]
-		tf_msg.translation.z = self.zed2marker[2][3]
-		
-                tf_msg.rotation.x = q[0]
-		tf_msg.rotation.y = q[1]
-		tf_msg.rotation.z = q[2]
-		tf_msg.rotation.w = q[3]
-
-		self.transform_matrix_publisher.publish(tf_msg)
-
-        
-                x = tf_msg.rotation.x # nitzan
-                y = tf_msg.rotation.y
-                z = tf_msg.rotation.z
-                w = tf_msg.rotation.w
-                print("X:", x, "Y:", y, "Z:", z, "W:", w)
-                euler_r, euler_p, euler_y = self.euler_from_quaternion(x, y, z, w) # nitzan
-                deg_r = euler_r * 180 / math.pi
-                deg_p = euler_p * 180 / math.pi
-                deg_y = euler_y * 180 / math.pi
-                print("R:", deg_r, "P:", deg_p, "Y:", deg_y)
-
-                deg_r, deg_p, deg_y = r.as_euler('xyz', degrees=True)
-                print("R:", deg_r, "P:", deg_p, "Y:", deg_y)
-		'''
 		tf_msg = Matrix4x4()
 		tf_msg.row1 = self.zed2marker[0]
 		tf_msg.row2 = self.zed2marker[1]
@@ -179,59 +127,6 @@ class PointCloudCamToMarkerConverter:
 	        return
                 #pointcloud_data = self.convert_point_clouds(pointcloud_data)
 	        #self.pointcloud_publisher.publish(pointcloud_data) 
-
-	'''
-	""" Helper function that loops through all the point clouds and converts their position to the marker coordinate system. """
-	def convert_point_clouds(self, pointcloud_data):
-		reader = point_cloud2.read_points(pointcloud_data, field_names = ["x", "y", "z", "rgb"], skip_nans=True)
-		new_points = []
-		print("Start converting point clouds.")
-		for p in reader:
-			# transfer point to aruco marker's corrdinate system
-			new_p = self.convert_point_to_marker(p[0], p[1], p[2])
-			new_p.append(p[3]) #add rgb value to the point
-			new_points.append(new_p)
-		print("Converted point clouds message of size " , len(new_points))
-		return point_cloud2.create_cloud(pointcloud_data.header, pointcloud_data.fields, new_points)
-
-	def convert_voxblox_mesh(self, meshdata):
-		if(len(meshdata.mesh_blocks) <= 0):
-			return 
-		num = 0
-		print("Converting voxblox mesh to marker coordinate system.")
-		for block in meshdata.mesh_blocks:
-			num += len(block.x)
-			block.x = list(block.x)
-			block.y = list(block.y)
-			block.z = list(block.z)
-			for i in range(len(block.x)):
-				converted_p = self.voxblox_pos_to_float_pos(block.x[i], block.y[i], block.z[i], block.index, meshdata.block_edge_length)
-				converted_p = self.convert_point_to_marker(converted_p[0], converted_p[1], converted_p[2])
-				converted_p = self.float_pos_to_voxblox_pos(converted_p[0], converted_p[1], converted_p[2], block.index, meshdata.block_edge_length)
-				#block.x[i] = converted_p[0]
-				#block.y[i] = converted_p[1]
-				#block.z[i] = converted_p[2]
-		self.mesh_publisher.publish(meshdata)
-		print("Finished converting mesh with vertices size:", num)
-		
-
-	def voxblox_pos_to_float_pos(self, x, y, z, index, block_edge_length):
-		new_x = ((float)(x / 32768.0) + index[0]) * block_edge_length
-		new_y = ((float)(y / 32768.0) + index[1]) * block_edge_length
-		new_z = ((float)(z / 32768.0) + index[2]) * block_edge_length
-		return [new_x, new_y, new_z]
-
-	def float_pos_to_voxblox_pos(self, x, y, z, index, block_edge_length):
-		new_x = np.uint16((x/block_edge_length - index[0]) * 32768)
-		new_y = np.uint16((y/block_edge_length - index[1]) * 32768)
-		new_z = np.uint16((z/block_edge_length - index[2]) * 32768)
-		return [new_x, new_y, new_z]
-
-	def convert_point_to_marker(self, x, y, z):
-		converted_p = list(np.matmul(self.zed2marker, [x, y, z, 1]))
-		converted_p = list([converted_p[0], converted_p[1], converted_p[2]]/converted_p[3])
-		return converted_p
-	'''
 	
 	""" Get an image as input and trys to calculate the zed to marker transformation matrix"""
 	def try_set_pose(self,image):				
