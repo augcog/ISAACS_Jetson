@@ -5,6 +5,11 @@ import pyzed.types as tp
 import pyzed.core as core
 import pyzed.defines as sl
 
+from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
+from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Quaternion
+
 SETTINGS = {
     "left_image_topic" : "left_rgb",
     "right_image_topic" : "right_rgb",
@@ -35,15 +40,8 @@ class ZedProcessor:
         tracking_parameters = sl.PositionalTrackingParameters()
         err = zed.enable_positional_tracking(tracking_parameters)
         print(err)
-
-    def initialize_publisher(self):
-        self.left_image_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["left_image_topic"]), Image, queue_size = 20)
-        self.right_image_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["right_image_topic"]), Image, queue_size = 20)
-        self.left_depth_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["left_depth_topic"]), Image, queue_size = 20)
-        self.position_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["position_topic"]), Vector3, queue_size = 20)
-        self.rotation_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["rotation_topic"]), Quaternion, queue_size = 20)
 	
-	def grab(self):
+	def grab(self) -> "dict":
         leftMat = core.PyMat()
         rightMat = core.PyMat()
         depthMat = core.PyMat()
@@ -79,6 +77,15 @@ class ZedProcessor:
     def generate_topic_name(self, topic):
         return self.topic_prefix + topic
 
+    # create ros topics of the camera info
+    def initialize_publisher(self):
+        self.left_image_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["left_image_topic"]), Image, queue_size = 20)
+        self.right_image_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["right_image_topic"]), Image, queue_size = 20)
+        self.left_depth_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["left_depth_topic"]), Image, queue_size = 20)
+        self.position_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["position_topic"]), Vector3, queue_size = 20)
+        self.rotation_publisher = rospy.Publisher(self.generate_topic_name(SETTINGS["rotation_topic"]), Quaternion, queue_size = 20)
+
+    # publish ros topics of the camera info
     def publish_topics(self, data):
         self.left_image_publisher.publish(data["left_rgb"])
         self.right_image_publisher.publish(data["right_rgb"])
