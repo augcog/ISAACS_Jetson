@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-import pyzed.sl as sl
+#import pyzed.sl as sl
 import cv2
 import time
 from fisheye_processor import FisheyeProcessor 
@@ -17,7 +17,7 @@ FISHEYE_SETTINGS = {
 }
 
 ZED_SETTINGS = {
-    "resolution" : sl.PyRESOLUTION.PyRESOLUTION_HD720,
+    #"resolution" : sl.PyRESOLUTION.PyRESOLUTION_HD720,
     "camera1_index" : 0,
     "camera1_topic_prefix" : "zed1",
     "camera2_index" : 1,
@@ -28,9 +28,10 @@ ZED_SETTINGS = {
 class CameraProcessor:
 
     #set up cameras and ros publisher
-	def start(self):		
+	def start(self):	
+		print("enter starts function")	
 		rospy.init_node('camera_processer', anonymous=True)
-		rospy.spin()
+		print("rospy starts")
 
 		self.fisheye_processor = FisheyeProcessor()
 		self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"], FISHEYE_SETTINGS["camera1_topic_prefix"])
@@ -42,6 +43,7 @@ class CameraProcessor:
 		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_index"], ZED_SETTINGS["camera2_topic_prefix"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 			
 		self.process_camera(SETTINGS["fps"])
+		rospy.spin()
 
     #publishing images from cameras at each frame to a ros topic
 	def process_camera(self, fps):
