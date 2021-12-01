@@ -34,13 +34,13 @@ class CameraProcessor:
 		print("rospy starts")
 
 		self.fisheye_processor = FisheyeProcessor()
-		self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"], FISHEYE_SETTINGS["camera1_topic_prefix"])
+		self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"])#, FISHEYE_SETTINGS["camera1_topic_prefix"])
 
 		#self.zed1_processor = ZedProcessor()
-		#self.zed1_processor.initialize(ZED_SETTINGS["camera1_index"], ZED_SETTINGS["camera1_topic_prefix"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
+		#self.zed1_processor.initialize(ZED_SETTINGS["camera1_index"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 	       
 		#self.zed2_processor = ZedProcessor()
-		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_index"], ZED_SETTINGS["camera2_topic_prefix"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
+		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_index"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 			
 		self.process_camera(SETTINGS["fps"])
 		rospy.spin()

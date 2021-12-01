@@ -5,29 +5,31 @@ import pyzed.types as tp
 import pyzed.core as core
 import pyzed.defines as sl
 
-from sensor_msgs.msg import CompressedImage
-from sensor_msgs.msg import Image
-from geometry_msgs.msg import Vector3
-from geometry_msgs.msg import Quaternion
+#from sensor_msgs.msg import CompressedImage
+#from sensor_msgs.msg import Image
+#from geometry_msgs.msg import Vector3
+#from geometry_msgs.msg import Quaternion
+
 
 SETTINGS = {
-    "left_image_topic" : "left_rgb",
-    "right_image_topic" : "right_rgb",
-    "left_depth_topic" : "left_depth",
-    "position_topic" : "position",
-    "rotation_topic" : "rotation",
+    #"left_image_topic" : "left_rgb",
+    #"right_image_topic" : "right_rgb",
+    #"left_depth_topic" : "left_depth",
+    #"position_topic" : "position",
+    #"rotation_topic" : "rotation",
 }
 
 # read rgb images from a zed camera and publish it as a ros topic
 class ZedProcessor:
-	def initialize(self, cameraIndex, topic_prefix, resolution, fps):
+	#def initialize(self, cameraIndex, topic_prefix, resolution, fps):
+    def initialize(self, cameraIndex, resolution, fps):
         init = zcam.PyInitParameters()
         init.camera_resolution = resolution
         init.camera_linux_id = cameraIndex
         init.camera_fps = fps
         self.cam = zcam.PyZEDCamera()
-        self.topic_prefix = topic_prefix
-        self.initialize_publisher()
+        #self.topic_prefix = topic_prefix
+        #self.initialize_publisher()
 
         if not cam.is_opened():
             print("Opening ZED Camera " + string(cameraIndex) + "...")
@@ -70,10 +72,10 @@ class ZedProcessor:
             oz = round(zed_pose.get_orientation(py_orientation).get()[2], 3)
             ow = round(zed_pose.get_orientation(py_orientation).get()[3], 3)
             data["rotation"] = py_orientation
-            self.publish_topics(data)
+            #self.publish_topics(data)
         return data
 
-    #add prefix to the topic, since there are multiple zed cameras
+    '''#add prefix to the topic, since there are multiple zed cameras
     def generate_topic_name(self, topic):
         return self.topic_prefix + topic
 
@@ -92,6 +94,7 @@ class ZedProcessor:
         self.left_depth_publisher.publish(data["left_depth"])
         self.position_publisher.publish(data["position"])
         self.rotation_publisher.publish(data["rotation"])
+    '''
 
 	def close(self, im):
         self.cam.close()
