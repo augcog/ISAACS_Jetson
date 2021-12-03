@@ -7,7 +7,7 @@ from zed_processor import ZedProcessor
 
 
 SETTINGS = {
-    "fps" : 60
+    "fps" : 30
 }
 
 FISHEYE_SETTINGS = {
