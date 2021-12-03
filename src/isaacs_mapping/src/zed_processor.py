@@ -49,11 +49,11 @@ class ZedProcessor:
         data = dict()
         if err == sl.ERROR_CODE.SUCCESS:
             self.cam.retrieve_image(leftMat, sl.VIEW.LEFT)
-            data["left_rgb"] = leftMat
+            data["left_rgb"] = leftMat.get_data()
             self.cam.retrieve_image(rightMat, sl.VIEW.RIGHT)
-            data["right_rgb"] = rightMat
+            data["right_rgb"] = rightMat.get_data()
             self.cam.retrieve_image(depthMat, sl.VIEW.DEPTH)
-            data["left_depth"] = depthMat
+            data["left_depth"] = depthMat.get_data()
             # Get the pose of the camera relative to the world frame
             state = self.cam.get_position(zed_pose, sl.REFERENCE_FRAME.WORLD)
             # translation
@@ -63,7 +63,8 @@ class ZedProcessor:
             py_orientation = sl.Orientation()
             data["rotation"] = zed_pose.get_orientation(py_orientation).get()
             #self.publish_topics(data)
-            print(data)
+            cv2.imshow("zed", data["left_rgb"])
+            #print(data)
         return data
 
     '''#add prefix to the topic, since there are multiple zed cameras
