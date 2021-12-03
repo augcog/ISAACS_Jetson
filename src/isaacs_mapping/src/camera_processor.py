@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import rospy
-#import pyzed.sl as sl
+import pyzed.sl as sl
 import cv2
 import time
 from fisheye_processor import FisheyeProcessor 
-#from zed_processor import ZedProcessor 
+from zed_processor import ZedProcessor 
 
 
 SETTINGS = {
@@ -17,10 +16,11 @@ FISHEYE_SETTINGS = {
 }
 
 ZED_SETTINGS = {
-    #"resolution" : sl.PyRESOLUTION.PyRESOLUTION_HD720,
-    "camera1_index" : 0,
+    "resolution" : sl.RESOLUTION.HD720,
+    "camera1_serial_number" : 20919438,
     "camera1_topic_prefix" : "zed1",
-    "camera2_index" : 1,
+
+    "camera2_serial_number" : 1,
     "camera2_topic_prefix" : "zed2",
 }
 
@@ -29,18 +29,14 @@ class CameraProcessor:
 
     #set up cameras and ros publisher
 	def start(self):	
-		print("enter starts function")	
-		rospy.init_node('camera_processer', anonymous=True)
-		print("rospy starts")
+		#self.fisheye_processor = FisheyeProcessor()
+		#self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"])#, FISHEYE_SETTINGS["camera1_topic_prefix"])
 
-		self.fisheye_processor = FisheyeProcessor()
-		self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"])#, FISHEYE_SETTINGS["camera1_topic_prefix"])
-
-		#self.zed1_processor = ZedProcessor()
-		#self.zed1_processor.initialize(ZED_SETTINGS["camera1_index"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
+		self.zed1_processor = ZedProcessor()
+		self.zed1_processor.initialize(ZED_SETTINGS["camera1_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 	       
 		#self.zed2_processor = ZedProcessor()
-		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_index"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
+		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 			
 		self.process_camera(SETTINGS["fps"])
 		rospy.spin()
@@ -57,20 +53,25 @@ class CameraProcessor:
 			# Capture the video frame by frame
 			if(timer >= timeInterval):
 				timer -= timeInterval
-				self.fisheye_processor.grab()
-		        #self.zed1_processor.grab()
-		        #self.zed2_processor.grab()
+				#self.fisheye_processor.grab()
+				self.zed1_processor.grab()
+		        	#self.zed2_processor.grab()
 
 			# the 'q' button is set as the quitting button
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
 		
 		# After the loop release the cap object
-		self.fisheye_processor.close()
-		#self.zed1_processor.close()
+		#self.fisheye_processor.close()
+		self.zed1_processor.close()
 		#self.zed2_processor.close()
+		cv2.destroyAllWindows()
 
 if __name__ == '__main__':
 	print('Node to publish cameras info start....')
+	cameras = sl.Camera.get_device_list()
+	#helper code to show serial number of all connected zed cameras 
+	#for cam in cameras:
+	#	print(cam.serial_number)
 	processor = CameraProcessor()
 	processor.start()

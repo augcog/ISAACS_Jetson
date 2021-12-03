@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 import cv2
-import pyzed.camera as zcam
-import pyzed.types as tp
-import pyzed.core as core
-import pyzed.defines as sl
+import pyzed.sl as sl
 
 #from sensor_msgs.msg import CompressedImage
 #from sensor_msgs.msg import Image
@@ -22,35 +19,35 @@ SETTINGS = {
 # read rgb images from a zed camera and publish it as a ros topic
 class ZedProcessor:
 	#def initialize(self, cameraIndex, topic_prefix, resolution, fps):
-    def initialize(self, cameraIndex, resolution, fps):
-        init = zcam.PyInitParameters()
+    def initialize(self, serialNumber, resolution, fps):
+        init = sl.InitParameters()
         init.camera_resolution = resolution
-        init.camera_linux_id = cameraIndex
         init.camera_fps = fps
-        self.cam = zcam.PyZEDCamera()
+        init.set_from_serial_number(serialNumber)
+        self.cam = sl.Camera()
         #self.topic_prefix = topic_prefix
         #self.initialize_publisher()
 
-        if not cam.is_opened():
-            print("Opening ZED Camera " + string(cameraIndex) + "...")
-        status = cam.open(init)
-        if status != tp.PyERROR_CODE.PySUCCESS:
+        if not self.cam.is_opened():
+            print("Opening ZED Camera " + str(serialNumber) + "...")
+        status = self.cam.open(init)
+        if status != sl.ERROR_CODE.SUCCESS:
             print(repr(status))
             exit()
 
-        self.runtime = zcam.PyRuntimeParameters()
+        self.runtime = sl.RuntimeParameters()
         tracking_parameters = sl.PositionalTrackingParameters()
-        err = zed.enable_positional_tracking(tracking_parameters)
+        err = self.cam.enable_positional_tracking(tracking_parameters)
         print(err)
 	
-	def grab(self) -> "dict":
-        leftMat = core.PyMat()
-        rightMat = core.PyMat()
-        depthMat = core.PyMat()
+    def grab(self):
+        leftMat = sl.Mat()
+        rightMat = sl.Mat()
+        depthMat = sl.Mat()
         zed_pose = sl.Pose()
         err = self.cam.grab(self.runtime)
         data = dict()
-        if err == tp.PyERROR_CODE.PySUCCESS:
+        if err == sl.ERROR_CODE.SUCCESS:
             self.cam.retrieve_image(leftMat, sl.VIEW.LEFT)
             data["left_rgb"] = leftMat
             self.cam.retrieve_image(rightMat, sl.VIEW.RIGHT)
@@ -58,21 +55,15 @@ class ZedProcessor:
             self.cam.retrieve_image(depthMat, sl.VIEW.DEPTH)
             data["left_depth"] = depthMat
             # Get the pose of the camera relative to the world frame
-            state = self.cam.get_position(zed_pose, sl.REFERENCE_FRAME.FRAME_WORLD)
+            state = self.cam.get_position(zed_pose, sl.REFERENCE_FRAME.WORLD)
             # translation
             py_translation = sl.Translation()
-            tx = round(zed_pose.get_translation(py_translation).get()[0], 3)
-            ty = round(zed_pose.get_translation(py_translation).get()[1], 3)
-            tz = round(zed_pose.get_translation(py_translation).get()[2], 3)
-            data["position"] = py_translation
+            data["position"] = zed_pose.get_translation(py_translation).get()
             # orientation quaternion
             py_orientation = sl.Orientation()
-            ox = round(zed_pose.get_orientation(py_orientation).get()[0], 3)
-            oy = round(zed_pose.get_orientation(py_orientation).get()[1], 3)
-            oz = round(zed_pose.get_orientation(py_orientation).get()[2], 3)
-            ow = round(zed_pose.get_orientation(py_orientation).get()[3], 3)
-            data["rotation"] = py_orientation
+            data["rotation"] = zed_pose.get_orientation(py_orientation).get()
             #self.publish_topics(data)
+            print(data)
         return data
 
     '''#add prefix to the topic, since there are multiple zed cameras
@@ -96,5 +87,5 @@ class ZedProcessor:
         self.rotation_publisher.publish(data["rotation"])
     '''
 
-	def close(self, im):
+    def close(self, im):
         self.cam.close()
