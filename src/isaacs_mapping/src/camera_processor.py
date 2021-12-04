@@ -20,7 +20,7 @@ ZED_SETTINGS = {
     "camera1_serial_number" : 20919438,
     "camera1_topic_prefix" : "zed1",
 
-    "camera2_serial_number" : 1,
+    "camera2_serial_number" : 21974856,
     "camera2_topic_prefix" : "zed2",
 }
 
