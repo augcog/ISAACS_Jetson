@@ -39,7 +39,6 @@ class CameraProcessor:
 		self.zed2_processor.initialize(ZED_SETTINGS["camera2_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 			
 		self.process_camera(SETTINGS["fps"])
-		rospy.spin()
 
     #grab images from camera
 	def process_camera(self, fps):
@@ -55,7 +54,7 @@ class CameraProcessor:
 				timer -= timeInterval
 				self.fisheye_processor.grab()
 				self.zed1_processor.grab()
-		        	self.zed2_processor.grab()
+				self.zed2_processor.grab()
 
 			# the 'q' button is set as the quitting button
 			if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -66,6 +65,50 @@ class CameraProcessor:
 		self.zed1_processor.close()
 		self.zed2_processor.close()
 		cv2.destroyAllWindows()
+		print("Cameras closed")
+
+	
+	""" HAVE NOT TESTED 
+	Detect the marker in the image and return the opencv camera to marker transformation matrix."""
+	def detect_marker(self, image):
+		#Set the params for marker and camera
+		self.aruco_dict = cv2.aruco.DICT_5X5_250
+		self.marker_size = 0.105
+		self.camera_intrinsic =  np.matrix([[519.5537109375, 0.0, 656.6468505859375], 
+							[0.0, 519.5537109375, 363.6219482421875], 
+							[0.0, 0.0, 1.0]])
+		self.camera_dist_coeffs = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
+
+		frame = image
+		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		aruco_dictionary = cv2.aruco.Dictionary_get(self.aruco_dict)
+		aruco_parameters =  cv2.aruco.DetectorParameters_create()
+
+		# lists of ids and the corners belonging to each id
+		corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary=aruco_dictionary, parameters = aruco_parameters)
+		if ids is None:
+			return None
+		rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, self.marker_size, self.camera_intrinsic, self.camera_dist_coeffs)
+		print("Rvec", rvec)
+		print("Tvec", tvec)
+		rvec = rvec[0][0]
+		print("rvec[00]", rvec)
+		tvec = tvec[0][0]
+		print("tvec[00]", tvec)
+
+		# visualize image of marker being detected
+		if self.show_marker_UI:
+			cv2.aruco.drawAxis(frame, self.camera_intrinsic, self.camera_dist_coeffs, rvec, tvec, self.marker_size)
+			cv2.imshow('image',frame) 
+			cv2.waitKey(1)
+
+		rotation_matrix = np.identity(4)
+		rmat = cv2.Rodrigues(rvec)[0]
+		rotation_matrix[:3, :3] = rmat  
+		rotation_matrix[:3, 3] = tvec
+		print("Rotation Matrix (marker in cam coords)")
+		print(rotation_matrix)
+		return np.linalg.inv(rotation_matrix) #opencv camera coordinate system to marker coordinate system, this camera coordinate system is not zed camera coord
 
 if __name__ == '__main__':
 	print('Node to publish cameras info start....')
