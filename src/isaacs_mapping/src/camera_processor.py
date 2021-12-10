@@ -27,21 +27,21 @@ ZED_SETTINGS = {
 # read infomation from cameras
 class CameraProcessor:
 
-    #set up cameras and ros publisher
+    #set up cameras
 	def start(self):	
-		#self.fisheye_processor = FisheyeProcessor()
-		#self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"])#, FISHEYE_SETTINGS["camera1_topic_prefix"])
+		self.fisheye_processor = FisheyeProcessor()
+		self.fisheye_processor.initialize(FISHEYE_SETTINGS["camera1_index"])#, FISHEYE_SETTINGS["camera1_topic_prefix"])
 
 		self.zed1_processor = ZedProcessor()
 		self.zed1_processor.initialize(ZED_SETTINGS["camera1_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 	       
-		#self.zed2_processor = ZedProcessor()
-		#self.zed2_processor.initialize(ZED_SETTINGS["camera2_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
+		self.zed2_processor = ZedProcessor()
+		self.zed2_processor.initialize(ZED_SETTINGS["camera2_serial_number"], ZED_SETTINGS["resolution"], SETTINGS["fps"])
 			
 		self.process_camera(SETTINGS["fps"])
 		rospy.spin()
 
-    #publishing images from cameras at each frame to a ros topic
+    #grab images from camera
 	def process_camera(self, fps):
 		prevTime = time.time()
 		timer = 0
@@ -53,18 +53,18 @@ class CameraProcessor:
 			# Capture the video frame by frame
 			if(timer >= timeInterval):
 				timer -= timeInterval
-				#self.fisheye_processor.grab()
+				self.fisheye_processor.grab()
 				self.zed1_processor.grab()
-		        	#self.zed2_processor.grab()
+		        	self.zed2_processor.grab()
 
 			# the 'q' button is set as the quitting button
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
 		
 		# After the loop release the cap object
-		#self.fisheye_processor.close()
+		self.fisheye_processor.close()
 		self.zed1_processor.close()
-		#self.zed2_processor.close()
+		self.zed2_processor.close()
 		cv2.destroyAllWindows()
 
 if __name__ == '__main__':

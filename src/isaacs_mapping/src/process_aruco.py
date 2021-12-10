@@ -1,3 +1,5 @@
+#this file used zed ros wrapper. For detecting marker with the new pipeline copy things from the detect_marker function
+
 #!/usr/bin/env python
 import rospy
 from scipy.spatial.transform import Rotation as R
